@@ -55,6 +55,17 @@
   else
     assign number_of_comments = article.comments_count
   endif
+
+  assign preload = false
+  assign loading = 'lazy'
+
+  if section.index == 1
+    assign preload = true
+  endif
+
+  if section.index <= 3
+    assign loading = 'eager'
+  endif
 -%}
 
 {%- if show_tags_and_tags_present -%}
@@ -97,14 +108,14 @@
     {% capture next_prev_links %}
     <div class="bg-scheme-background px-section-horizontal-spacing py-section-vertical-spacing text-right text-base text-scheme-text">
       <ul class="flex items-center">
-        <li class="mr-auto w-28 text-left justify-between">
+        <li class="mr-auto w-28 justify-between text-left">
           {% if blog.next_article %}
             <a class="theme-link theme-link--back inline-flex items-center justify-center hover:text-scheme-accent" href="{{ blog.next_article }}" title="{{ 'blogs.article.newer_post' | t }}">
               {{ 'blogs.article.newer_post' | t }}
             </a>
           {% endif %}
         </li>
-        <li class="ml-auto w-28 text-right justify-between">
+        <li class="ml-auto w-28 justify-between text-right">
           {% if blog.previous_article %}
             <a class="theme-link inline-flex items-center justify-center hover:text-scheme-accent" href="{{ blog.previous_article }}" title="{{ 'blogs.article.older_post' | t }}">
               {{ 'blogs.article.older_post' | t }}
@@ -125,11 +136,12 @@
     {%- if article.image != blank -%}
       <div class="full-h relative lg:col-span-12 bg-scheme-background{% unless settings.fill_image_to_border_edge %} p-2 lg:p-4{% endunless %}{% unless image_width_desktop == 'full' %} lg:hidden{% endunless %}">
         <div class="relative{% if indent_image %} p-8 lg:p-16{% endif %}">
-          {%
-            render 'image-crop' with
+          {% render 'image-crop',
             image: article.image,
             sizes: sizes,
-            ratio: ratio
+            ratio: ratio,
+            preload: preload,
+            loading: loading
           %}
         </div>
       </div>

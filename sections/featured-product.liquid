@@ -2,7 +2,9 @@
   assign section_color = section.settings.color_scheme
   assign enable_video_looping = section.settings.enable_video_looping
 
-  case section.settings.desktop_media_width
+  assign desktop_media_width = section.settings.desktop_media_width
+
+  case desktop_media_width
     when 'one-third'
       assign content_width_desktop = 'lg:col-span-8'
 
@@ -55,6 +57,17 @@
   endif
 
   assign complementary_products_block = section.blocks | where: 'type', 'complementary' | first
+
+  assign preload = false
+  assign loading = 'lazy'
+
+  if section.index == 1
+    assign preload = true
+  endif
+
+  if section.index <= 3
+    assign loading = 'eager'
+  endif
 -%}
 
 {{ 'modules-product.bundle.css' | asset_url | stylesheet_tag }}
@@ -71,6 +84,7 @@
         shouldUpdateHistoryState: false,
       })
     "
+    data-product-root="{{ section.id }}"
     data-enable-image-zoom="false"
     data-color-scheme="{{ section_color }}"
   >
@@ -85,7 +99,9 @@
               {% render 'product-media',
                 media: featured_media,
                 sizes: media_sizes,
-                enable_video_looping: enable_video_looping
+                enable_video_looping: enable_video_looping,
+                preload: preload,
+                loading: loading
               %}
             </li>
             {% for media in product.media %}
@@ -247,8 +263,18 @@
 
 {%- liquid
   if complementary_products_block
+    case desktop_media_width
+      when 'one-third'
+        assign desktop_content_column_sizes_base = 'calc(100vw / 3)'
+      when 'one-half'
+        assign desktop_content_column_sizes_base = '50vw'
+      when 'three-fifths'
+        assign desktop_content_column_sizes_base = '40vw'
+      when 'two-thirds'
+        assign desktop_content_column_sizes_base = 'calc((100vw / 3 * 2))'
+    endcase
     # theme-check-disable NestedSnippet
-    render 'product-block-complementary-products-output', complementary_products_block: complementary_products_block
+    render 'product-block-complementary-products-output', complementary_products_block: complementary_products_block, desktop_sizes_base: desktop_content_column_sizes_base
     # theme-check-enable NestedSnippet
   endif
 -%}
@@ -1961,17 +1987,19 @@
       ]
     }
   ],
-  "templates": [
-    "404",
-    "article",
-    "blog",
-    "collection",
-    "list-collections",
-    "page",
-    "password",
-    "product",
-    "search",
-    "index"
-  ]
+  "enabled_on": {
+    "templates": [
+      "404",
+      "article",
+      "blog",
+      "collection",
+      "list-collections",
+      "page",
+      "password",
+      "product",
+      "search",
+      "index"
+    ]
+  }
 }
 {% endschema %}

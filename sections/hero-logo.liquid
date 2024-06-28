@@ -40,12 +40,19 @@
   >
     <div class="px-section-horizontal-spacing py-section-vertical-spacing">
       {%- if logo != blank -%}
-        {%- assign logo_alt = logo.alt | default: shop.name | escape -%}
+        {%- liquid
+          assign logo_alt = logo.alt | default: shop.name | escape
+
+          if section.location == 'header'
+            assign preload = true
+          else
+            assign preload = false
+          endif
+        -%}
         <div
           class="{{ alignment_classes }}"
           style="max-width: {{ section.settings.logo_max_width }}%"
         >
-          {%- assign logo_alt = logo.alt | default: shop.name | escape -%}
           {{
             logo
             | image_url: width: 3000
@@ -54,7 +61,7 @@
               width: logo.width,
               sizes: sizes,
               alt: logo_alt,
-              preload: true
+              preload: preload
           }}
         </div>
       {%- else -%}

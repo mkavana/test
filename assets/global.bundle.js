@@ -131,27 +131,6 @@ function variantLiveRegion(variant) {
   }
   liveRegion(_liveRegionContent());
 }
-
-/*! outline.js v1.2.0 - https://github.com/lindsayevans/outline.js/ */
-// modified by Switch Themes to use body classname instead of adding a style tag
-(function (d) {
-  const dom_events = ('addEventListener' in d);
-  const add_event_listener = function (type, callback) {
-    // Basic cross-browser event handling
-    if (dom_events) {
-      d.addEventListener(type, callback);
-    } else {
-      d.attachEvent('on' + type, callback);
-    }
-  };
-  // Using mousedown instead of mouseover, so that previously focused elements don't lose focus ring on mouse move
-  add_event_listener('mousedown', function () {
-    document.body.classList.add("user-using-mouse");
-  });
-  add_event_listener('keydown', function () {
-    document.body.classList.remove("user-using-mouse");
-  });
-})(document);
 window.liveRegion = liveRegion;
 window.variantLiveRegion = variantLiveRegion;
 window.cartLiveRegion = cartLiveRegion;
@@ -161,4 +140,4 @@ if (!window.formatMoney) {
     return formatMoney(amount, format);
   };
 }
-console.log('Baseline theme (3.0.6) by SWITCH | Make the switch: https://switchthemes.co');
+console.log('Baseline theme (3.2.0) by SWITCH | Make the switch: https://switchthemes.co');

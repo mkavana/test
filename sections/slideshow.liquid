@@ -53,10 +53,17 @@
               assign height = 'full_height'
             endunless
 
+            assign preload = false
             assign loading = 'lazy'
 
-            if forloop.first and section.index <= 3
-              assign loading = 'eager'
+            if forloop.first
+              if section.index == 1
+                assign preload = true
+              endif
+
+              if section.index <= 3
+                assign loading = 'eager'
+              endif
             endif
 
             assign content_position = block.settings.content_position
@@ -77,11 +84,11 @@
             data-index="{{ forloop.index0 }}"
             {{ block.shopify_attributes }}
           >
-            {%-
-              render 'image-with-text-overlay',
+            {%- render 'image-with-text-overlay',
               height: height,
               image: image,
               image_mobile: image_mobile,
+              preload: preload,
               indent_image: indent_image,
               no_border: no_border_on_slide,
               content_position: content_position,
@@ -95,7 +102,7 @@
               cta_link: cta_link,
               cta_text: cta_text,
               cta_style: cta_style,
-              loading: loading,
+              loading: loading
             -%}
           </li>
         {% endfor %}

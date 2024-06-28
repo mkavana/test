@@ -36,7 +36,8 @@
 }
 
 .product-block-area.py-section-vertical-spacing .collapsible-tab:first-child,
-.product-block-area.py-section-vertical-spacing .complementary-products-block:not(:empty):first-child {
+.product-block-area.py-section-vertical-spacing
+  .complementary-products-block:not(:empty):first-child {
   margin-top: calc(-1 * var(--spacing));
 }
 

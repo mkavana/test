@@ -59,12 +59,12 @@
           {% endunless %}
         >
           <a
-            href="{{ product.url | within: collection }}"
+            href="{{ product.url }}"
             class="{{ text_size }} group hover:text-scheme-accent block{% if sold_out %} text-scheme-secondary{% endif %}"
             {% if image != blank and product_image_display == 'on_hover' %}
-              x-on:mouseenter="currentLink = '{% if image != blank %}{{ product.handle }}{% else %}''{% endif %}'"
+              x-on:mouseenter="currentLink = '{%- if image != blank -%}{{- product.handle -}}{%- endif -%}'"
               x-on:mouseleave="setTimeout(() => { if(currentLink == '{{ product.handle }}') {currentLink = ''}  }, 200)"
-              x-on:focus="currentLink = '{% if image != blank %}{{ product.handle }}{% else %}''{% endif %}'"
+              x-on:focus="currentLink = '{%- if image != blank -%}{{- product.handle -}}{%- endif -%}'"
               x-on:blur="setTimeout(() => { if(currentLink == '{{ product.handle }}') {currentLink = ''}  }, 200)"
             {% endif %}
           >
@@ -130,7 +130,7 @@
             {% endunless %}
           >
             <a
-              href="{{ product.url | within: collection }}"
+              href="{{ product.url }}"
               class="{{ text_size }} group hover:text-scheme-accent block{% if sold_out %} text-scheme-secondary{% endif %}"
               x-on:mouseenter="currentLink = 'placeholder'"
               x-on:mouseleave="currentLink = ''"
@@ -253,9 +253,7 @@
     {
       "type": "checkbox",
       "id": "show_view_all",
-      "label": {
-        "en": "Show 'View all' link"
-      },
+      "label": "Show “View all” link",
       "default": false
     },
     {

@@ -1,5 +1,6 @@
 document.addEventListener('alpine:init', () => {
   Alpine.store('modals', {
+    domContentLoaded: false,
     leftDrawer: { open: false, contents: '' },
     rightDrawer: { open: false, contents: '' },
     quickBuyDrawer: { open: false, contents: '' },
@@ -7,12 +8,19 @@ document.addEventListener('alpine:init', () => {
     promo: { open: false, contents: '' },
     popup: { open: false, contents: '' },
     modals: {},
-    register(name, slotName) {
+    async register(name, slotName) {
       this.modals[name] = slotName;
 
-      document.addEventListener('DOMContentLoaded', () => {
-        this.setUpHide(slotName);
-      });
+      if (!this.domContentLoaded) {
+        await new Promise((resolve) => {
+          document.addEventListener('DOMContentLoaded', () => {
+            this.domContentLoaded = true;
+            resolve();
+          });
+        });
+      }
+
+      this.setUpHide(slotName);
     },
     open(name) {
       if (this.modals[name]) {
@@ -98,8 +106,6 @@ document.addEventListener('alpine:init', () => {
       Object.keys(this.modals).forEach((modal) => {
         Alpine.store('modals').close(modal);
       });
-
-      Alpine.store('modals').open('cart');
     },
   });
 });

@@ -49,21 +49,28 @@
     <ul class="grid grid-cols-1 gap-gutter bg-gridline-color lg:grid-cols-12">
       {%- for item in items -%}
         {%- liquid
-          assign collection = item
+          assign collection = collections[item.settings.collection]
+          assign item_color_scheme = section.settings.color_scheme
 
-          if using_blocks
-            assign collection = collections[item.settings.collection]
-            assign item_color_scheme = section.settings.color_scheme
+          unless item.settings.follow_color_scheme
+            assign item_color_scheme = item.settings.color_scheme
+          endunless
 
-            unless item.settings.follow_color_scheme
-              assign item_color_scheme = item.settings.color_scheme
-            endunless
+          assign content_position = section.settings.content_position
 
-            assign content_position = section.settings.content_position
+          if item.settings.content_position != 'default'
+            assign content_position = item.settings.content_position
+          endif
 
-            if item.settings.content_position != 'default'
-              assign content_position = item.settings.content_position
-            endif
+          assign preload = false
+          assign loading = 'lazy'
+
+          if section.index == 1 and forloop.first
+            assign preload = true
+          endif
+
+          if section.index <= 3 and forloop.index <= 2
+            assign loading = 'eager'
           endif
         -%}
         <li class="{{ desktop_col_span }} relative w-full bg-scheme-background">
@@ -74,17 +81,15 @@
                   or collection.products.first != blank
                 %}
                   {%- assign image = collection.featured_image -%}
-                  {%
-                    render 'image-crop' with
+                  {% render 'image-crop',
                     image: image,
                     sizes: sizes,
+                    preload: preload,
+                    loading: loading,
                     ratio: ratio
                   %}
                 {%- else -%}
-                  {%
-                    render 'image-crop-placeholder' with
-                    ratio: ratio
-                  %}
+                  {% render 'image-crop-placeholder', ratio: ratio %}
                 {%- endif -%}
               </div>
             </div>
@@ -125,8 +130,6 @@
       <ul class="grid grid-cols-1 gap-gutter bg-gridline-color lg:grid-cols-12">
         {%- for collection in collections -%}
           {%- liquid
-            assign collection = item
-
             if collection.handle == 'frontpage' and using_blocks == false
               assign collection_limit = collection_limit | minus: 1
             endif

@@ -46,6 +46,7 @@
               :class="{ 'opacity-50 cursor-progress' : locked }"
               key="CartItem-{{ forloop.index }}-{{ item.key }}"
               id="CartItem-{{ forloop.index }}-{{ item.key }}"
+              data-line-item-key="{{ item.key }}"
             >
               <div
                 class="{% if template == 'cart' %}max-lg:col-span-2 max-lg:row-span-2 col-span-1{% else %}col-span-2 row-span-2{% endif %}"
@@ -54,7 +55,7 @@
                   <div>
                     <a
                       class="block"
-                      href="{{ item.url | within: collections.all }}"
+                      href="{{ item.url }}"
                     >
                       {{
                         item
@@ -90,9 +91,7 @@
                       </p>
                     {% endif %}
 
-                    {%- assign property_size = item.properties | size -%}
-
-                    {% if property_size > 0 %}
+                    {% unless item.properties == empty %}
                       {% assign first_character_in_key = p.first | slice: 0 %}
                       {% unless p.last == blank
                         or first_character_in_key == '_'
@@ -113,7 +112,7 @@
                           {% endfor %}
                         </div>
                       {% endunless %}
-                    {% endif %}
+                    {% endunless %}
 
                     <p
                       class="cart-item-error my-2 text-sm"
@@ -169,6 +168,7 @@
                 <div
                   class="flex justify-start items-start{% if template == 'cart' %} lg:justify-center lg:items-center{% endif %}"
                   x-data="CartItemQuantity"
+                  x-ref="quantityControl"
                 >
                   <button
                     type="submit"
@@ -184,6 +184,7 @@
                     name="updates[]"
                     id="updates_{{ item.key }}"
                     value="{{ item.quantity }}"
+                    data-variant-id="{{ item.variant_id }}"
                     data-last-value="{{ item.quantity }}"
                     class="w-6 min-w-0 pb-1 text-center text-sm{% if template == 'cart' %} lg:text-base {% endif %}border-b-text border-current bg-transparent"
                     min="1"

@@ -18,9 +18,5 @@
       }
     }
   },
-  "order": [
-    "promo-popup",
-    "age-check",
-    "privacy-banner"
-  ]
+  "order": ["promo-popup", "age-check", "privacy-banner"]
 }

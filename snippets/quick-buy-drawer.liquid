@@ -18,7 +18,7 @@
         x-transition:leave="duration-300 motion-reduce:duration-0 outline-0"
         x-transition:leave-end="max-lg:translate-y-full lg:translate-x-full"
         x-trap.noscroll.inert="$store.modals.quickBuyDrawer.open"
-        class="mt-auto h-auto w-full transform border-gridline-color bg-scheme-background text-scheme-text lg:ml-auto lg:h-full lg:w-11/12 lg:max-w-md lg:border-l-gridline lg:overflow-y-auto"
+        class="mt-auto h-auto w-full transform border-gridline-color bg-scheme-background text-scheme-text lg:ml-auto lg:h-full lg:w-11/12 lg:max-w-md lg:overflow-y-auto lg:border-l-gridline"
         role="dialog"
         aria-modal="true"
         :aria-label="getModalLabel('quickBuyDrawer', document.getElementById('quick-buy-drawer-slot'))"
@@ -41,7 +41,10 @@
             </div>
           </button>
         </div>
-        <div id="quick-buy-drawer-slot" class="max-lg:h-fit max-lg:max-h-[65vh] max-lg:overflow-y-auto"></div>
+        <div
+          id="quick-buy-drawer-slot"
+          class="max-lg:h-fit max-lg:max-h-[65vh] max-lg:overflow-y-auto"
+        ></div>
       </div>
     </div>
   </template>

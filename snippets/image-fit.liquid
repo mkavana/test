@@ -11,6 +11,10 @@
     assign loading = null
   endunless
 
+  unless preload
+    assign preload = false
+  endunless
+
   if contain
     assign object_class = 'object-contain'
   else

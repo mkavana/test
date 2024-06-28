@@ -10,6 +10,10 @@
   unless loading
     assign loading = null
   endunless
+
+  unless preload
+    assign preload = false
+  endunless
 -%}
 
 {% if ratio == 0 %}

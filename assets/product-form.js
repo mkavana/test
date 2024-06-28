@@ -40,15 +40,30 @@ document.addEventListener('alpine:init', () => {
         let errors = data.errors || data.description;
         let message = data.description || data.message;
 
+        const errorDetail = {
+          sourceId: formId,
+          variantId: Number(formData.get('id')),
+          errors,
+          message,
+        };
+
         this.$root.dispatchEvent(
           new CustomEvent('baseline:productform:error', {
-            detail: {
-              sourceId: formId,
-              variantId: formData.get('id'),
-              errors,
-              message,
-            },
+            detail: errorDetail,
             bubbles: true,
+          })
+        );
+
+        const formEl = this.formEl;
+        const productRootEl = formEl.closest('[data-product-root]') || null;
+
+        document.dispatchEvent(
+          new CustomEvent('theme:product:error:add-to-cart', {
+            detail: {
+              productRootEl,
+              formEl,
+              ...errorDetail,
+            },
           })
         );
       } else {
@@ -61,7 +76,10 @@ document.addEventListener('alpine:init', () => {
         document.body.dispatchEvent(
           new CustomEvent('baseline:cart:afteradditem', {
             bubbles: true,
-            detail: { response: data },
+            detail: {
+              response: data,
+              sourceId: formId,
+            },
           })
         );
       }

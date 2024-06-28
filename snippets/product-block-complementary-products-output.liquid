@@ -6,6 +6,23 @@
   {%- liquid
     assign products_per_row = complementary_products_block.settings.products_per_row_desktop | plus: 0
     assign products_per_row_mobile = complementary_products_block.settings.products_per_row_mobile | plus: 0
+
+    unless sizes
+      unless desktop_sizes_base
+        assign desktop_sizes_base = '50vw'
+      endunless
+
+      assign desktop_sizes = '(min-width: 1024px) calc(' | append: desktop_sizes_base | append: ' / ' | append: products_per_row | append: ')'
+
+      case products_per_row_mobile
+        when 1
+          assign mobile_sizes = '100vw'
+        when 2
+          assign mobile_sizes = '50vw'
+      endcase
+
+      assign sizes = desktop_sizes | append: ', ' | append: mobile_sizes
+    endunless
   -%}
   <div
     class="complementary-products-block {% if complementary_products_block.settings.heading_text_style == 'body' %}complementary-products-block--font-body {% endif %}mt-8"
@@ -28,18 +45,21 @@
             {% if block.settings.product_tile_type == 'text_overlay' %}
               {%- render 'product-tile-text-overlay',
                 product: product,
+                sizes: sizes,
+                loading: 'eager',
                 section_color: section_color,
                 products_per_row_mobile: products_per_row_mobile
               -%}
             {% else %}
-              {%-
-                render 'product-tile-standard',
+              {%- render 'product-tile-standard',
                 product: product,
+                sizes: sizes,
+                loading: 'eager',
                 section_color: section_color,
                 products_per_row_mobile: products_per_row_mobile,
                 enable_quick_buy: enable_quick_buy,
                 quick_buy_button_classes: quick_buy_button_classes,
-                inserted: true,
+                inserted: true
               -%}
             {% endif %}
           </li>

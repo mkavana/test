@@ -3,9 +3,7 @@
     const headerGroupHeights = [];
 
     document
-      .querySelectorAll(
-        '.shopify-section-group-header-group:not(.has-no-height)'
-      )
+      .querySelectorAll('.shopify-section-group-header-group')
       .forEach((headerGroupSectionEl) => {
         headerGroupHeights.push(
           headerGroupSectionEl.getBoundingClientRect().height

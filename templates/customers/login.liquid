@@ -88,7 +88,6 @@
             <h1 class="font-heading mb-2 text-2xl">
               {{ 'customer.login_page.title' | t }}
             </h1>
-            {{ form.errors | default_errors }}
             {%- if recover_success == true -%}
               <h3 tabindex="-1" autofocus>
                 <span>{{ 'customer.recover_password.success' | t }}</span>

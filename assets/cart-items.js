@@ -14,6 +14,19 @@ document.addEventListener('alpine:init', () => {
         'baseline:cart:cartqtychange',
         this.onCartQuantityChange.bind(this)
       );
+
+      window.addEventListener(
+        'baseline:cart:update',
+        this.onCartQuantityChange.bind(this)
+      );
+
+      document.addEventListener('baseline:cart:lock', () => {
+        this.loading = true;
+      });
+
+      document.addEventListener('baseline:cart:unlock', () => {
+        this.loading = false;
+      });
     },
     onCartQuantityChange(e) {
       Alpine.morph(
@@ -61,6 +74,85 @@ document.addEventListener('alpine:init', () => {
           }
         });
       }
+
+      const itemsRootEl = this.itemsRoot;
+
+      switch (e.type) {
+        case 'baseline:cart:afteradditem':
+          document.dispatchEvent(
+            new CustomEvent('theme:product:add', {
+              detail: {
+                cartItemCount: window.theme.cartItemCount,
+                itemsRootEl,
+                lineItemEl:
+                  document.querySelector(
+                    `[data-line-item-key="${e.detail.response.key}"]`
+                  ) || null,
+                variantId: e.detail.response.variant_id,
+                key: e.detail.response.key,
+                formEl: document.getElementById(e.detail.sourceId),
+                get cartPromise() {
+                  return fetch(
+                    window.theme.routes.cart_url,
+                    fetchConfigDefaults()
+                  )
+                    .then((res) => res.json())
+                    .then((cart) => cart)
+                    .catch((error) =>
+                      console.error(
+                        'Error fetching cart in `theme:product:add`',
+                        error
+                      )
+                    );
+                },
+              },
+            })
+          );
+          break;
+        case 'baseline:cart:cartqtychange':
+          document.dispatchEvent(
+            new CustomEvent('theme:line-item:change', {
+              detail: {
+                cartItemCount: e.detail.response.item_count,
+                itemsRootEl,
+                lineItemEl:
+                  document.querySelector(
+                    `[data-line-item-key="${e.detail.key}"]`
+                  ) || null,
+                variantId: e.detail.variantId,
+                key: e.detail.key,
+                quantity: e.detail.quantity,
+                previousQuantity: e.detail.previousQuantity,
+                cart: e.detail.response,
+              },
+            })
+          );
+          break;
+        case 'baseline:cart:update':
+          document.dispatchEvent(
+            new CustomEvent('theme:cart:update', {
+              detail: {
+                cartItemCount: window.theme.cartItemCount,
+                itemsRootEl,
+                get cartPromise() {
+                  return fetch(
+                    window.theme.routes.cart_url,
+                    fetchConfigDefaults()
+                  )
+                    .then((res) => res.json())
+                    .then((cart) => cart)
+                    .catch((error) =>
+                      console.error(
+                        'Error fetching cart in `theme:cart:update`',
+                        error
+                      )
+                    );
+                },
+              },
+            })
+          );
+          break;
+      }
     },
     updateLiveRegion(liveRegionText) {
       if (!liveRegionText) return;
@@ -83,6 +175,15 @@ document.addEventListener('alpine:init', () => {
     key,
     locked: false,
     errorMessage: null,
+    init() {
+      document.addEventListener('baseline:cart:lock', () => {
+        this.locked = true;
+      });
+
+      document.addEventListener('baseline:cart:unlock', () => {
+        this.locked = false;
+      });
+    },
     async itemQuantityChange() {
       if (this.locked || this.loading) return;
 
@@ -114,13 +215,36 @@ document.addEventListener('alpine:init', () => {
         if (data.status === 422) {
           this.errorMessage = data.message;
           this.quantity = this.previousQuantity;
+
+          document.dispatchEvent(
+            new CustomEvent('theme:line-item:error', {
+              detail: {
+                message: this.errorMessage,
+                itemsRootEl: this.itemsRoot,
+                lineItemEl:
+                  document.querySelector(
+                    `[data-line-item-key="${this.key}"]`
+                  ) || null,
+                variantId: Number(this.$refs.quantityInput.dataset.variantId),
+                key: this.key,
+                quantity: this.quantity,
+              },
+            })
+          );
         } else {
           this.errorMessage = null;
 
           document.body.dispatchEvent(
             new CustomEvent('baseline:cart:cartqtychange', {
               bubbles: true,
-              detail: { response: data, originalTarget: this.$root },
+              detail: {
+                response: data,
+                key: this.key,
+                quantity: this.quantity,
+                previousQuantity: this.previousQuantity,
+                variantId: Number(this.$refs.quantityInput.dataset.variantId),
+                originalTarget: this.$refs.quantityControl,
+              },
             })
           );
         }
@@ -128,6 +252,14 @@ document.addEventListener('alpine:init', () => {
         console.error(e);
         document.getElementById('cart-errors').textContent =
           theme.strings.cartError;
+        document.dispatchEvent(
+          new CustomEvent('theme:cart:error:other', {
+            detail: {
+              message: theme.strings.cartError,
+              error: e,
+            },
+          })
+        );
       } finally {
         this.locked = false;
         this.loading = false;

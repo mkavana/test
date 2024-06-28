@@ -43,19 +43,15 @@ document.addEventListener('alpine:init', () => {
               }
             }
 
-            document.addEventListener('shopify:section:select', (e) => {
-              if (!e.target.contains(this.$root)) return;
+            document.addEventListener(
+              'shopify:section:select',
+              this.onSectionSelect.bind(this)
+            );
 
-              if (!this.enabled) return;
-
-              Alpine.store('modals').open('ageCheck');
-            });
-
-            document.addEventListener('shopify:section:deselect', (e) => {
-              if (!e.target.contains(this.$root)) return;
-
-              this.$store.modals.close('ageCheck');
-            });
+            document.addEventListener(
+              'shopify:section:deselect',
+              this.onSectionDeselect.bind(this)
+            );
           }
 
           if (this.redirectURL === null) {
@@ -66,6 +62,18 @@ document.addEventListener('alpine:init', () => {
             this.date = new Date();
             setTimeout(() => this.setUpDOB(), 100);
           }
+        },
+        onSectionSelect(e) {
+          if (!e.target.contains(this.$root)) return;
+
+          if (!this.enabled) return;
+
+          Alpine.store('modals').open('ageCheck');
+        },
+        onSectionDeselect(e) {
+          if (!e.target.contains(this.$root)) return;
+
+          this.$store.modals.close('ageCheck');
         },
         approveEntry() {
           Alpine.store('modals').close('ageCheck');
@@ -171,6 +179,17 @@ document.addEventListener('alpine:init', () => {
               setTimeout(() => this.checkAge(), 500);
             }
           });
+        },
+        destroy() {
+          document.removeEventListener(
+            'shopify:section:select',
+            this.onSectionSelect
+          );
+
+          document.removeEventListener(
+            'shopify:section:deselect',
+            this.onSectionDeselect
+          );
         },
       };
     }

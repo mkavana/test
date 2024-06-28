@@ -24,7 +24,9 @@
           endif
         endif
 
-        if is_color
+        assign swatches_count = option.values | map: 'swatch' | compact | size
+
+        if is_color or swatches_count > 0
           assign option_style = 'buttons'
         else
           assign option_style = option_style_setting
@@ -48,7 +50,7 @@
         {%- else -%}
           <legend class="{{ label_class }}">
             {{ option.name }}:
-            {% if is_color -%}
+            {% if is_color or swatches_count > 0 -%}
               <span x-text="option{{ forloop.index }}"></span>
             {%- endif %}
           </legend>
@@ -116,12 +118,8 @@
               {% endfor %}
             </div>
           {%- when 'buttons' -%}
-            <div class="mt-2 flex flex-wrap items-center justify-start{% unless is_color %} -mx-1{% else %} -mx-[calc(theme(spacing.2)_-_1px)]{% endunless %}">
+            <div class="mt-2 flex flex-wrap items-center justify-start{% unless is_color or swatches_count > 0 %} -mx-1{% else %} -mx-[calc(theme(spacing.2)_-_1px)]{% endunless %}">
               {% for value in option.values %}
-                {% liquid
-                  assign color_image_url = value | handle | append: '.' | append: 'png' | file_img_url: '110x' | prepend: 'https:'
-                  assign color_swatch_fallback = value | split: ' ' | last | handle
-                %}
                 <div class="label-only-input relative px-1{% if hide_sold_out_variants %} [&:has(.sold-out)]:hidden{% endif %}{% if hide_unavailable_variants %} [&:has(.unavailable)]:hidden{% endif %}">
                   <input
                     class="peer absolute left-0 top-0 h-full w-full cursor-pointer opacity-0"
@@ -140,19 +138,40 @@
                   >
                   <label
                     class="
-                      relative select-none block{% unless is_color %} p-2 min-w-9{% else %} p-[2px]{% endunless %} cursor-pointer rounded-button border-text border-transparent text-center peer-checked:border-scheme-text peer-[.sold-out]:line-through
-                      peer-[.unavailable]:line-through {% if is_color %}
+                      relative select-none block{% unless is_color or swatches_count > 0 %} p-2 min-w-9{% else %} p-[2px]{% endunless %} cursor-pointer rounded-button border-text border-transparent text-center peer-checked:border-scheme-text peer-[.sold-out]:line-through
+                      peer-[.unavailable]:line-through {% if is_color or swatches_count > 0 %}
                       peer-[:not(.sold-out,.unavailable)]:[&>span:first-of-type]:hidden{% endif %}
                     "
                     for="Section-{{ section.id }}-Option{{ option.position }}-{{ value | escape }}"
                     title="{{ option.value }}"
                   >
-                    {%- if is_color %}
+                    {%- if swatches_count > 0 -%}
+                      {%- liquid
+                        assign swatch = value.swatch
+                        assign swatch_image = swatch.image
+                        assign swatch_color = swatch.color
+                      -%}
                       <span
                         class="absolute inset-0 z-10 h-full w-full bg-scheme-background/25"
                       >
                         <span
-                          class="absolute bottom-0 left-0 top-1/2 z-10 h-0.5 w-full -translate-y-1/2 -rotate-45 transform bg-scheme-text"
+                          class="absolute bottom-0 left-0 top-1/2 z-10 h-[var(--text-border-width)] w-full -translate-y-1/2 -rotate-45 transform bg-scheme-text"
+                        ></span>
+                      </span>
+                      <span
+                        class="block h-6 w-6 rounded-button bg-cover bg-no-repeat"
+                        style="background-position: {{ swatch_image.presentation.focal_point | default: 'center' }};{% if swatch_image != blank %} background-image: url({{ swatch_image | image_url: width: 160 }});{% else %}{% endif %}{% if swatch_color != blank %} background-color: rgb({{ swatch_color.rgb }});{% endif %}"
+                      ></span>
+                    {%- elsif is_color -%}
+                      {%- liquid
+                        assign color_image_url = value | handle | append: '.' | append: 'png' | file_img_url: '110x' | prepend: 'https:'
+                        assign color_swatch_fallback = value | split: ' ' | last | handle
+                      -%}
+                      <span
+                        class="absolute inset-0 z-10 h-full w-full bg-scheme-background/25"
+                      >
+                        <span
+                          class="absolute bottom-0 left-0 top-1/2 z-10 h-[var(--text-border-width)] w-full -translate-y-1/2 -rotate-45 transform bg-scheme-text"
                         ></span>
                       </span>
                       <span
@@ -161,7 +180,7 @@
                       ></span>
                     {%- endif -%}
                     <span
-                      {% if is_color %}
+                      {% if is_color or swatches_count > 0 %}
                         class="sr-only"
                       {% endif %}
                     >

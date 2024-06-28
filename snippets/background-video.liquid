@@ -88,7 +88,9 @@
         x-ref="video"
       >
         {% for source in video.sources %}
+          {% # theme-check-disable RemoteAsset %}
           <source src="{{ source.url }}" type="{{ source.mime_type }}">
+          {% # theme-check-enable RemoteAsset %}
         {% endfor %}
         {%- if fallback_image -%}
           {%-

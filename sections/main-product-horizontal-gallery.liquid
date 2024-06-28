@@ -50,11 +50,12 @@
       initialVariant: {{ current_variant | json | escape }},
       optionsWithValues: {{ product.options_with_values | json | escape }},
       featuredMediaId: {% if featured_media %}{{ featured_media.id }}{% else %}null{% endif %},
-      isHorizontalGalleryTemplate: true,
       shouldUpdateHistoryState: true,
-      swapMediaOnDesktop: {{ swap_media_on_desktop | json }}
+      swapMediaOnDesktop: {{ swap_media_on_desktop | json }},
+      templateSuffix: '{{ template.suffix }}'
     })
   "
+  data-product-root="{{ section.id }}"
   data-color-scheme="{{ section_color }}"
 >
   {%- liquid
@@ -105,9 +106,14 @@
               assign media_id = media_id_string | plus: 0
               assign media = product.media | where: 'id', media_id | first
 
+              assign preload = false
               assign loading = 'lazy'
 
-              if forloop.index <= 4 and section.index <= 3
+              if section.index == 1 and forloop.first
+                assign preload = true
+              endif
+
+              if section.index <= 3 and forloop.index <= 4
                 assign loading = 'eager'
               endif
             -%}
@@ -118,15 +124,15 @@
               class="splide__slide relative bg-scheme-background w-full{% if settings.fill_image_to_border_edge %} lg:border-r-gridline lg:border-gridline-color{% endif %}"
               data-index="{{ forloop.index0 }}"
             >
-              {%-
-                render 'horizontal-gallery-product-media',
+              {%- render 'horizontal-gallery-product-media',
                 media: media,
                 image_index: image_index,
                 desktop_media_height: desktop_media_height,
                 slideshow_enabled: slideshow_enabled,
                 section_color: section_color,
                 enable_video_looping: enable_video_looping,
-                loading: loading,
+                preload: preload,
+                loading: loading
               -%}
             </li>
             {%- liquid
@@ -238,6 +244,8 @@
                   echo '<div class="mt-8" ' | append: block.shopify_attributes | append: '>'
                   render 'social-sharing', tag: 'h2', share_title: product.title, share_permalink: product.url, share_image: product, section_color: section_color`
                   echo '</div>'
+                when 'information_list'
+                  render 'product-block-information-list', block: block, product: product
               endcase
             endif
           endfor
@@ -282,6 +290,8 @@
                 echo '</div>'
               when 'complementary'
                 render 'product-block-complementary', block: block
+              when 'information_list'
+                render 'product-block-information-list', block: block, product: product
             endcase
           endif
         endfor
@@ -317,6 +327,8 @@
                   echo '<div class="mt-8" ' | append: block.shopify_attributes | append: '>'
                   render 'social-sharing', tag: 'h2', share_title: product.title, share_permalink: product.url, share_image: product
                   echo '</div>'
+                when 'information_list'
+                  render 'product-block-information-list', block: block, product: product
               endcase
             endif
           endfor
@@ -390,7 +402,7 @@
 {%- liquid
   if complementary_products_block
     # theme-check-disable NestedSnippet
-    render 'product-block-complementary-products-output', complementary_products_block: complementary_products_block
+    render 'product-block-complementary-products-output', complementary_products_block: complementary_products_block, desktop_sizes_base: '50vw'
     # theme-check-enable NestedSnippet
   endif
 -%}

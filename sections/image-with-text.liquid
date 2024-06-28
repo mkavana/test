@@ -56,20 +56,32 @@
   >
     <div class="relative min-h-full">
       {%- if section.settings.image != blank -%}
-        {%- assign image = section.settings.image -%}
+        {%- liquid
+          assign image = section.settings.image
+
+          if section.index == 1
+            assign preload = true
+          else
+            assign preload = false
+          endif
+        -%}
         {%- if fill_image -%}
           <div class="hidden lg:block">
-            {% render 'image-fit', image: image, sizes: sizes %}
+            {% render 'image-fit',
+              image: image,
+              sizes: sizes,
+              preload: preload
+            %}
           </div>
           <div class="block lg:hidden">
-            {% render 'image', image: image, sizes: sizes %}
+            {% render 'image', image: image, sizes: sizes, preload: preload %}
           </div>
         {%- else -%}
           <div class="relative">
-            {%
-              render 'image-crop' with
+            {% render 'image-crop',
               image: image,
               sizes: sizes,
+              preload: preload,
               ratio: ratio
             %}
           </div>

@@ -91,6 +91,7 @@
     {%- case section.settings.layout -%}
       {% when 'feature' %}
         <ol>
+          {% assign counter = 0 %}
           {% for article in blog.articles %}
             {% capture cycle %}{% cycle 'odd', 'even' %}{% endcapture %}
 
@@ -141,6 +142,21 @@
               endcase
 
               assign sizes = '(min-width: 1024px) ' | append: desktop_sizes | append: ', 100vw'
+
+              assign counter = counter | plus: 1
+
+              assign preload = false
+              assign loading = 'lazy'
+
+              if forloop.first
+                if section.index == 1
+                  assign preload = true
+                endif
+
+                if section.index <= 3
+                  assign loading = 'eager'
+                endif
+              endif
             -%}
 
             <li class="relative grid grid-flow-row-dense gap-gutter overflow-hidden bg-gridline-color lg:grid-cols-12 group{% unless forloop.first %} border-t-gridline border-gridline-color{% endunless %}">
@@ -156,10 +172,11 @@
               >
               {%- if article.image != blank -%}
                 <div class="{{ image_width_desktop }} full-h relative bg-scheme-background {% unless settings.fill_image_to_border_edge %}p-2 lg:p-4 flex items-center{% endunless %}">
-                  {%
-                    render 'image-crop' with
+                  {% render 'image-crop',
                     image: article.image,
                     sizes: sizes,
+                    preload: preload,
+                    loading: loading,
                     ratio: ratio,
                     crop: section.settings.crop
                   %}
@@ -258,7 +275,22 @@
             assign sizes = '(min-width: 1024px) calc(100vw / 3), 100vw'
           -%}
           {% for article in blog.articles %}
-            {%- assign counter = counter | plus: 1 -%}
+            {%- liquid
+              assign counter = counter | plus: 1
+
+              assign preload = false
+              assign loading = 'lazy'
+
+              if forloop.first
+                if section.index == 1
+                  assign preload = true
+                endif
+
+                if section.index <= 3
+                  assign loading = 'eager'
+                endif
+              endif
+            -%}
             <li class="group relative bg-scheme-background text-scheme-text">
               <a class="absolute inset-0 z-10" href="{{ article.url }}"
                 ><span class="sr-only">
@@ -276,6 +308,8 @@
                         render 'image-crop' with
                         image: article.image,
                         sizes: sizes,
+                        preload: preload,
+                        loading: loading,
                         ratio: ratio,
                         crop: section.settings.crop
                       %}

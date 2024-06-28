@@ -141,7 +141,7 @@
         {% endunless %}
       >
         {% unless quick_buy %}
-          <span class="hidden no-js:inline" :class="`hidden`">
+          <span :class="`hidden`">
             {% if current_variant.available %}
               {{ 'products.product.add_to_cart' | t -}}
             {% else %}

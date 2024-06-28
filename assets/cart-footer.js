@@ -33,6 +33,10 @@ document.addEventListener('alpine:init', () => {
         window.addEventListener('baseline:cart:cartqtychange', (e) => {
           this._morphFooter(e);
         });
+
+        window.addEventListener('baseline:cart:update', (e) => {
+          this._morphFooter(e);
+        });
       },
     };
   });

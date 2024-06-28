@@ -5,7 +5,9 @@
 
   assign models = product.media | where: 'media_type', 'model'
 
-  case section.settings.desktop_media_width
+  assign desktop_media_width = section.settings.desktop_media_width
+
+  case desktop_media_width
     when 'one-third'
       assign content_width_desktop = 'lg:col-span-8'
 
@@ -92,7 +94,9 @@
     assign enable_variant_media = section.settings.enable_variant_media
   endunless
 
-  if section.settings.always_show_product_featured_media_first or enable_variant_media
+  assign always_show_product_featured_media_first = section.settings.always_show_product_featured_media_first
+
+  if always_show_product_featured_media_first or enable_variant_media
     assign featured_media = product.featured_media
   else
     assign featured_media = current_variant.featured_media | default: product.featured_media
@@ -119,7 +123,7 @@
   assign single_variant_mode = false
 
   unless product.has_only_default_variant
-    if section.settings.variant_media_behavior == 'single_variant_mode'
+    if section.settings.single_variant_mode == true
       assign single_variant_mode = true
     else
       assign single_variant_mode = false
@@ -128,18 +132,34 @@
 
   if enable_variant_media or single_variant_mode
     assign variants_with_media = product.variants | where: 'featured_media'
+    assign first_variant_media = variants_with_media | map: 'featured_media' | first
+    assign variant_media_ids_array = variants_with_media | map: 'featured_media' | map: 'id' | uniq
 
-    assign variant_media_ids = ''
+    if enable_variant_media == false and variants_with_media.size > 0
+      # Reset media ids array to only include reachable media
 
-    for variant in variants_with_media
-      assign variant_media_ids = variant_media_ids | append: variant.featured_media.id
+      if first_variant_media
+        assign slice_point = first_variant_media.position | minus: 1
+        assign non_variant_media = product.media | slice: 0, slice_point
+        assign non_variant_media_ids_array = non_variant_media | map: 'id'
+      endif
 
-      unless forloop.last
-        assign variant_media_ids = variant_media_ids | append: ','
-      endunless
+      assign media_ids = ''
 
-      assign variant_media_ids_array = variant_media_ids | split: ','
-    endfor
+      if featured_media
+        assign media_ids = media_ids | append: featured_media.id | append: ','
+      endif
+
+      assign media_ids_array = non_variant_media_ids_array | concat: variant_media_ids_array | uniq
+    endif
+
+    if always_show_product_featured_media_first
+      # If there is no non-variant media, reset some assumptions
+      if first_variant_media.position == 1
+        assign always_show_product_featured_media_first = false
+        assign featured_media = current_variant.featured_media
+      endif
+    endif
   endif
 
   assign complementary_products_block = section.blocks | where: 'type', 'complementary' | first
@@ -163,8 +183,10 @@
         {{ section.settings.always_show_product_featured_media_first }},
       firstMediaFullWidth: {{ first_media_full_width }},
       shouldUpdateHistoryState: true,
+      templateSuffix: '{{ template.suffix }}',
     })
   "
+  data-product-root="{{ section.id }}"
   data-color-scheme="{{ section_color }}"
 >
   {%- liquid
@@ -216,23 +238,28 @@
               assign media_id = media_id_string | plus: 0
               assign media = product.media | where: 'id', media_id | first
 
+              assign preload = false
               assign loading = 'lazy'
 
-              if forloop.index <= 3 and section.index <= 3
+              if section.index == 1 and forloop.first
+                assign preload = true
+              endif
+
+              if section.index <= 3 and forloop.index <= 3
                 assign loading = 'eager'
               endif
 
               if enable_variant_media or single_variant_mode
                 if forloop.first
-                  assign non_variant_media = true
+                  assign is_non_variant_media = true
                   assign media_group_id = media.id
                 endif
 
-                if variant_media_ids_array contains media_id_string
+                if variant_media_ids_array contains media.id
                   assign media_group_id = media.id
-                  assign non_variant_media = false
+                  assign is_non_variant_media = false
                 else
-                  if single_variant_mode and enable_variant_media == false and non_variant_media == false
+                  if single_variant_mode and enable_variant_media == false and is_non_variant_media == false
                     assign media_group_id = null
                   endif
                 endif
@@ -258,20 +285,25 @@
                 {% endif %}
               {% endif %}
               {% if single_variant_mode %}
-                x-show="isMaxLgBreakpoint{% if media_group_id %} || currentMediaId === {{ media_group_id }}{% endif %}"
-                {% if two_media_per_row %}
-                  :class="{ 'col-span-2' : shouldBeFullWidth() }"
-                {% endif %}
+                :class="
+                  {
+                  {% if two_media_per_row %}
+                    'col-span-2' : $el.parentNode && shouldBeFullWidth(),
+                  {% endif %}
+                    'lg:hidden' : $el.parentNode
+                    && {% if media_group_id %}currentMediaId !== {{ media_group_id }}{% else %}true{% endif %}
+                  }
+                "
               {% endif %}
             >
-              {%-
-                render 'product-media',
+              {%- render 'product-media',
                 media: media,
                 sizes: sizes,
                 image_index: image_index,
                 scroll_to: media_scroll_to,
                 enable_video_looping: enable_video_looping,
-                loading: loading,
+                preload: preload,
+                loading: loading
               -%}
             </li>
 
@@ -284,38 +316,42 @@
         </ul>
       </div>
       {% assign first_3d_model = models | first %}
-      <div
-        class="mx-1 mt-2 grid grid-cols-[minmax(0,_1fr)_auto] gap-2 no-js:hidden lg:hidden"
-        x-data="
-          {
-            paginationIsWrapped: false,
-            checkIfWrapped() {
-              this.paginationIsWrapped = hasWrappedChildren(this.$refs.pagination)
-            }
-          }
-        "
-        x-init="checkIfWrapped"
-        @resize.window.debounce.250="checkIfWrapped"
-      >
-        <ul x-ref="pagination" class="splide__pagination"></ul>
+      {% if product.media.size > 1 %}
         <div
-          class="splide__arrows col-end-last flex items-center justify-end gap-1 text-scheme-text"
-          :class="{ 'items-start pt-0.5' : paginationIsWrapped, 'items-center' : !paginationIsWrapped }"
+          class="mx-1 mt-2 grid grid-cols-[minmax(0,_1fr)_auto] gap-2 opacity-0 no-js:hidden lg:hidden"
+          x-data="
+            {
+              paginationIsWrapped: false,
+              checkIfWrapped() {
+                this.paginationIsWrapped = hasWrappedChildren(this.$refs.pagination)
+              }
+            }
+          "
+          x-init="checkIfWrapped"
+          @resize.window.debounce.250="checkIfWrapped"
+          x-show="slideCount > 1"
+          :class="{ 'opacity-0' : !splideIsReady }"
         >
-          <button class="splide__arrow splide__arrow--prev w-8">
-            <span class="sr-only">
-              {{- 'sections.slideshow.previous_slide' | t -}}
-            </span>
-            <span class="block">{% render 'icon-arrow-left' %}</span>
-          </button>
-          <button class="splide__arrow splide__arrow--next w-8">
-            <span class="sr-only">
-              {{- 'sections.slideshow.next_slide' | t -}}
-            </span>
-            <span class="block">{% render 'icon-arrow-right' %}</span>
-          </button>
+          <ul x-ref="pagination" class="splide__pagination"></ul>
+          <div
+            class="splide__arrows col-end-last flex items-center justify-end gap-1 text-scheme-text"
+            :class="{ 'items-start pt-0.5' : paginationIsWrapped, 'items-center' : !paginationIsWrapped }"
+          >
+            <button class="splide__arrow splide__arrow--prev w-8">
+              <span class="sr-only">
+                {{- 'sections.slideshow.previous_slide' | t -}}
+              </span>
+              <span class="block">{% render 'icon-arrow-left' %}</span>
+            </button>
+            <button class="splide__arrow splide__arrow--next w-8">
+              <span class="sr-only">
+                {{- 'sections.slideshow.next_slide' | t -}}
+              </span>
+              <span class="block">{% render 'icon-arrow-right' %}</span>
+            </button>
+          </div>
         </div>
-      </div>
+      {% endif %}
       {%- if first_3d_model -%}
         <div class="px-section-horizontal-spacing text-center">
           <button
@@ -413,8 +449,18 @@
 
 {% liquid
   if complementary_products_block
+    case desktop_media_width
+      when 'one-third'
+        assign desktop_content_column_sizes_base = 'calc(100vw / 3)'
+      when 'one-half'
+        assign desktop_content_column_sizes_base = '50vw'
+      when 'three-fifths'
+        assign desktop_content_column_sizes_base = '40vw'
+      when 'two-thirds'
+        assign desktop_content_column_sizes_base = 'calc((100vw / 3 * 2))'
+    endcase
     # theme-check-disable NestedSnippet
-    render 'product-block-complementary-products-output', complementary_products_block: complementary_products_block
+    render 'product-block-complementary-products-output', complementary_products_block: complementary_products_block, desktop_sizes_base: desktop_content_column_sizes_base
     # theme-check-enable NestedSnippet
   endif
 %}
@@ -478,14 +524,14 @@
       "info": "Applies only if two media per row on desktop is enabled"
     },
     {
+      "type": "header",
+      "content": "Product variants"
+    },
+    {
       "type": "select",
       "id": "variant_media_behavior",
       "label": "Variant media change behavior on desktop",
       "options": [
-        {
-          "value": "single_variant_mode",
-          "label": "Single variant mode"
-        },
         {
           "value": "swap",
           "label": "Swap with first media"
@@ -501,6 +547,12 @@
       "type": "checkbox",
       "id": "always_show_product_featured_media_first",
       "label": "Always show product featured media first"
+    },
+    {
+      "type": "checkbox",
+      "id": "single_variant_mode",
+      "label": "Single variant mode",
+      "info": "Will override “Variant media change behavior on desktop” setting"
     },
     {
       "type": "checkbox",

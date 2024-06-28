@@ -191,6 +191,8 @@
     class="collection border-b-gridline border-gridline-color bg-scheme-background text-scheme-text transition-opacity duration-200 ease-in-out"
     {% if show_filters or show_sort %}
       x-data="Filterable"
+    {% else %}
+      x-data
     {% endif %}
     data-color-scheme="{{ section_color }}"
     @keydown.escape.document="onEscape"
@@ -383,20 +385,38 @@
         {%- if collection.products.size > 0 -%}
           <ul class="collection-list grid grid-cols-2 {{ desktop_grid_class }} gap-gutter bg-gridline-color{% if filters_layout_on_desktop == 'sidebar' %} border-b-gridline border-gridline-color -mb-gridline{% endif %}">
             {%- for product in collection.products -%}
-              {%- assign counter = counter | plus: 1 -%}
+              {% liquid
+                assign counter = counter | plus: 1
+
+                if section.index <= 3 and forloop.index <= products_per_row_mobile
+                  assign loading = 'eager'
+                else
+                  assign loading = 'lazy'
+                endif
+
+                if section.index == 1 and forloop.first
+                  assign preload = true
+                else
+                  assign preload = false
+                endif
+              %}
+
               <li class="{{ mobile_col_span }} {{ desktop_col_span }} bg-scheme-background text-scheme-text">
                 {% if section.settings.product_tile_type == 'text_overlay' %}
-                  {%-
-                    render 'product-tile-text-overlay',
+                  {%- render 'product-tile-text-overlay',
                     product: product,
                     sizes: sizes,
+                    preload: preload,
+                    loading: loading,
                     section_color: section_color,
-                    products_per_row_mobile: products_per_row_mobile,
+                    products_per_row_mobile: products_per_row_mobile
                   -%}
                 {% else %}
                   {%- render 'product-tile-standard',
                     product: product,
                     sizes: sizes,
+                    preload: preload,
+                    loading: loading,
                     section_color: section_color,
                     products_per_row_mobile: products_per_row_mobile,
                     enable_quick_buy: enable_quick_buy,

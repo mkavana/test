@@ -11,6 +11,11 @@ document.addEventListener('alpine:init', () => {
         'baseline:cart:cartqtychange',
         this.onCartUpdate.bind(this)
       );
+
+      window.addEventListener(
+        'baseline:cart:update',
+        this.onCartUpdate.bind(this)
+      );
     },
     async onCartUpdate() {
       const updatedSection = await freshHTML(

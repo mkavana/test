@@ -13,24 +13,18 @@
     assign force_crop = true
   endif
 
-  case desktop_product_tile_width
-    when '40'
-      assign sizes = '(min-width: 1024px) 40vw'
-    when '60'
-      assign sizes = '(min-width: 1024px) 60vw'
-    when '80'
-      assign sizes = '(min-width: 1024px) 80vw'
-    when '100'
-      assign sizes = '(min-width: 1024px) 100vw'
-  endcase
+  assign sizes = '(min-width: 1024px) ' | append: desktop_product_tile_width | append: 'vw'
 
   case mobile_product_tile_width
     when '60'
       assign sizes = sizes | append: ', 60vw'
+      assign lazy_loading_limit = 2
     when '80'
       assign sizes = sizes | append: ', 80vw'
+      assign lazy_loading_limit = 2
     when '100'
       assign sizes = sizes | append: ', 100vw'
+      assign lazy_loading_limit = 1
   endcase
 
   capture view_all_button_underneath
@@ -67,9 +61,16 @@
       "
       class="splide"
     >
-      <div class="splide__track bg-gridline-color [.splide:not(.is-active)_&]:invisible no-js:[.splide:not(.is-active)_&]:visible">
+      <div class="splide__track bg-gridline-color no-js:[.splide:not(.is-active)_&]:visible [.splide:not(.is-active,_.is-initialized)_&]:invisible">
         <ul class="splide__list no-js:gap-gridline no-js:overflow-x-auto [.splide:not(.is-active)_&]:!flex [.splide:not(.is-active)_&]:gap-gridline">
           {%- for product in collection.products limit: product_limit -%}
+            {%- liquid
+              assign loading = 'lazy'
+
+              if section.index <= 3 and forloop.index <= lazy_loading_limit
+                assign loading = 'eager'
+              endif
+            -%}
             <li
               class="splide__slide w-[var(--mobile-slide-width)] border-b-gridline border-gridline-color bg-scheme-background no-js:!block lg:w-[var(--desktop-slide-width)]"
             >
@@ -77,6 +78,7 @@
                 {%- render 'product-tile-text-overlay',
                   product: product,
                   sizes: sizes,
+                  loading: loading,
                   section_color: section_color,
                   force_crop: force_crop,
                   force_crop_ratio: section.settings.image_crop
@@ -85,6 +87,7 @@
                 {%- render 'product-tile-standard',
                   product: product,
                   sizes: sizes,
+                  loading: loading,
                   section_color: section_color,
                   force_crop: force_crop,
                   force_crop_ratio: section.settings.image_crop,
@@ -253,9 +256,7 @@
     {
       "type": "checkbox",
       "id": "show_view_all",
-      "label": {
-        "en": "Show 'View all' link"
-      },
+      "label": "Show “View all” link",
       "default": false
     },
     {

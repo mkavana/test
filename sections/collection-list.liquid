@@ -26,6 +26,8 @@
   endif
 
   assign desktop_grid_class = 'lg:grid-cols-' | append: grid_cols
+
+  assign eager_loading_limit = section.blocks.size | at_most: 4
 -%}
 
 <section
@@ -55,6 +57,17 @@
           endunless
 
           assign scheme_text_color_only = block.settings.scheme_text_color_only
+
+          assign preload = false
+          assign loading = 'lazy'
+
+          if section.index == 1 and forloop.first
+            assign preload = true
+          endif
+
+          if section.index <= 2 and forloop.index <= eager_loading_limit
+            assign loading = 'eager'
+          endif
         -%}
 
         <li
@@ -76,11 +89,12 @@
                   {%- assign image = collection.image
                     | default: collection.products.first.featured_image
                   -%}
-                  {%
-                    render 'image-crop',
+                  {% render 'image-crop',
                     image: image,
                     ratio: ratio,
                     sizes: sizes,
+                    preload: preload,
+                    loading: loading
                   %}
                 {%- else -%}
                   {% render 'image-crop-placeholder', ratio: ratio %}

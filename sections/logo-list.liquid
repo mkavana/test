@@ -47,7 +47,7 @@
       {% if block.settings.image != blank %}
         {% capture content %}
           <div class="relative" style="padding-top: 100%;">
-            {% render 'image-fit' with
+            {% render 'image-fit',
               image: block.settings.image,
               sizes: sizes,
               no_placeholder: true,
@@ -104,7 +104,7 @@
               );
             --scrolling-items-direction: {{ direction }};
           "
-          class="block w-max whitespace-nowrap motion-safe:animate-[scrolling-items_var(--scrolling-items-speed)_linear_infinite_var(--scrolling-items-direction)] motion-safe:hover:[animation-play-state:paused] {{ font }} {{ text_size_class }} motion-reduce:block motion-reduce:-translate-x-1/4 motion-reduce:whitespace-normal motion-reduce:px-section-horizontal-spacing motion-reduce:text-center"
+          class="block w-max whitespace-nowrap motion-safe:animate-[scrolling-items_var(--scrolling-items-speed)_linear_infinite_var(--scrolling-items-direction)] motion-safe:hover:[animation-play-state:paused] {{ text_size_class }} motion-reduce:block motion-reduce:-translate-x-1/4 motion-reduce:whitespace-normal motion-reduce:px-section-horizontal-spacing motion-reduce:text-center"
         >
           <scrolling-items-surface class="flex flex-nowrap items-center">
             <scrolling-items-content class="{{ content_class }}">

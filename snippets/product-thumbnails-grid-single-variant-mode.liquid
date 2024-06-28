@@ -1,6 +1,4 @@
 {%- liquid
-  assign media_index = 0
-
   if mobile_only or desktop_only
     if mobile_only
       assign display_classes = 'grid lg:hidden'
@@ -23,7 +21,7 @@
       assign media_group = ''
     endif
 
-    if variant_media_ids_array contains media_id_string
+    if variant_media_ids_array contains media.id
       assign media_group = media_group | replace_last: ',', ''
       assign media_groups = media_groups | append: media_group | append: ':::'
       assign media_group = ''
@@ -42,7 +40,7 @@
 {% for media_group in media_groups_array %}
   {%- liquid
     assign media_group_array = media_group | split: ','
-    assign counter = 0
+    assign media_index = 0
   -%}
   <ul
     class="{{ display_classes }} grid-cols-5 gap-gridline border-b-gridline border-gridline-color bg-gridline-color"
@@ -50,7 +48,7 @@
     @keydown.down.prevent.stop="$focus.wrap().next()"
     @keydown.left.prevent.stop="$focus.wrap().previous()"
     @keydown.up.prevent.stop="$focus.wrap().previous()"
-    x-show="currentMediaId === {{ media_group_array | first }}"
+    x-show="slideCount > 1 && currentMediaId === {{ media_group_array | first }}"
     {% unless forloop.first %}
       style="display: none;"
     {% endunless %}
@@ -106,11 +104,10 @@
       </li>
       {% liquid
         assign media_index = media_index | plus: 1
-        assign counter = counter | plus: 1
       %}
     {% endfor %}
     {%- liquid
-      assign items_on_last_row = counter | modulo: 5
+      assign items_on_last_row = media_index | modulo: 5
       assign placeholder_width = 5 | minus: items_on_last_row
     -%}
     {%- if items_on_last_row != 0 -%}

@@ -26,6 +26,8 @@
   endcase
 
   assign sizes = sizes | append: ', 100vw'
+
+  assign eager_loading_limit = section.settings.post_limit | at_most: 4
 -%}
 
 {%- capture placeholder_image -%}
@@ -52,7 +54,22 @@
 
   <ol class="grid grid-cols-1 gap-gutter bg-gridline-color lg:grid-cols-12">
     {% for article in blog.articles limit: section.settings.post_limit %}
-      {%- assign counter = counter | plus: 1 -%}
+      {% liquid
+        assign counter = counter | plus: 1
+
+        if section.index == 1 and forloop.first
+          assign preload = true
+        else
+          assign preload = false
+        endif
+
+        if section.index <= 2 and forloop.index <= eager_loading_limit
+          assign loading = 'eager'
+        else
+          assign loading = 'lazy'
+        endif
+      %}
+
       <li class="{{ desktop_col_span }} group relative bg-scheme-background text-scheme-text">
         <a class="absolute inset-0 z-10" href="{{ article.url }}"
           ><span class="sr-only">
@@ -64,11 +81,12 @@
             {%- if article.image != blank -%}
               <div class="full-h bg-scheme-background {% if settings.fill_image_to_border_edge %}border-b-gridline border-gridline-color{% else %}pt-2 px-section-horizontal-spacing lg:pt-4{% endif %}">
                 <div class="relative">
-                  {%
-                    render 'image-crop' with
+                  {% render 'image-crop',
                     image: article.image,
                     ratio: ratio,
-                    sizes: sizes
+                    sizes: sizes,
+                    loading: loading,
+                    preload: preload
                   %}
                 </div>
               </div>
@@ -226,9 +244,7 @@
     {
       "type": "checkbox",
       "id": "show_view_all",
-      "label": {
-        "en": "Show 'view all' link"
-      },
+      "label": "Show “View all” link",
       "default": false
     },
     {

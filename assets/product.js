@@ -15,8 +15,17 @@ function SplideProductExtension(Splide, Components, options) {
     const targetSlideMediaHeight =
       targetSlideMedia.getBoundingClientRect().height;
 
-    Splide.root.querySelector('.splide__track').style.maxHeight =
-      targetSlideMediaHeight + 'px';
+    const gridlineWidth =
+      parseInt(
+        getComputedStyle(document.documentElement).getPropertyValue(
+          '--gridline-width'
+        ),
+        10
+      ) || 0;
+
+    Splide.root.querySelector('.splide__track').style.maxHeight = `${
+      targetSlideMediaHeight + gridlineWidth
+    }px`;
 
     const thumbnailsSplideVerticalEl = Splide.root.parentNode.querySelector(
       '.splide.splide--thumbnails.splide--thumbnails--vertical'
@@ -66,6 +75,10 @@ function SplideProductExtension(Splide, Components, options) {
     __resizeTrackForSlideAtIndex(Splide.index);
   }
 
+  function onSlidesUpdated() {
+    __resizeTrackForSlideAtIndex(Splide.index);
+  }
+
   function onWindowResize() {
     __resizeTrackForSlideAtIndex(Splide.index);
   }
@@ -96,6 +109,7 @@ function SplideProductExtension(Splide, Components, options) {
     on('move', onMove);
     on('destroy', onDestroy);
     bind(window, 'resize', debouncedWindowResize);
+    on('slides:updated', onSlidesUpdated);
 
     if (Shopify.designMode) {
       document.addEventListener('shopify:section:unload', (e) => {
@@ -128,8 +142,8 @@ document.addEventListener('alpine:init', () => {
       alwaysShowProductFeaturedMediaFirst = false,
       firstMediaFullWidth = false,
       shouldUpdateHistoryState = false,
-      isHorizontalGalleryTemplate = false,
       swapMediaOnDesktop = false,
+      templateSuffix = null,
     }) => ({
       productForm: null,
       productRoot: null,
@@ -155,7 +169,6 @@ document.addEventListener('alpine:init', () => {
       locked: false,
       optionChangesThisKeypress: 0,
       shouldUpdateHistoryState,
-      isHorizontalGalleryTemplate,
       swapMediaOnDesktop,
       hasGiftCardRecipientForm: false,
       firstMediaView: true,
@@ -163,12 +176,23 @@ document.addEventListener('alpine:init', () => {
       errorMessage: '',
       isMaxLgBreakpoint: window.isMaxLgBreakpoint(),
       maxLgBreakpointMQL: window.maxLgBreakpointMQL(),
+      productMediaContainerResizeObserver: null,
       splide: null,
       thumbnailsSplideHorizontal: null,
       thumbnailsSplideVertical: null,
-      productMediaContainerResizeObserver: null,
+      mainSplideOptions: null,
+      thumbnailsSplideHorizontal: null,
+      thumbnailsSplideVertical: null,
+      thumbnailActiveStatePaused: false,
       splideIndex: 0,
+      slideCount: 0,
+      allSlides: [],
+      allHorizontalThumbnailsSlides: [],
+      allVerticalThumbnailsSlides: [],
+      splidesInFlux: false,
+      splideIsReady: false,
       mediaListIsReordered: false,
+      templateSuffix,
       get productMediaContainerEl() {
         return this.$root.querySelector('[data-product-media-container]');
       },
@@ -228,12 +252,17 @@ document.addEventListener('alpine:init', () => {
         option3 = this.option3
       ) {
         return (
-          this.product.variants.filter(
+          this.product.variants.find(
             (variant) =>
               variant.option1 === option1 &&
               variant.option2 === option2 &&
               variant.option3 === option3
-          )[0] || null
+          ) || null
+        );
+      },
+      getVariantById(id) {
+        return (
+          this.product.variants.find((variant) => variant.id === id) || null
         );
       },
       clearSingleOptionSelectorDecoration(...classNames) {
@@ -258,9 +287,13 @@ document.addEventListener('alpine:init', () => {
       ) {
         this.productRoot
           .querySelectorAll(
-            `[data-single-option-selector][data-position="${atPosition}"][value="${withValue}"]`
+            `[data-single-option-selector][data-position="${atPosition}"]`
           )
           .forEach((optionEl) => {
+            if (optionEl.value !== withValue) {
+              return;
+            }
+
             optionEl.classList.add(...classNames);
 
             if (
@@ -381,9 +414,6 @@ document.addEventListener('alpine:init', () => {
         return splideIsNotDestroyed(this.splide);
       },
       init() {
-        // Set a product root for nested components
-        // to use instead of $root (which refers to their root)
-
         this.isMaxLgBreakpoint = this.maxLgBreakpointMQL.matches;
 
         this.maxLgBreakpointMQL.addEventListener('change', (e) => {
@@ -391,9 +421,50 @@ document.addEventListener('alpine:init', () => {
         });
 
         if (this.singleVariantMode) {
-          this.$watch('isMaxLgBreakpoint', (value) => {
-            this.triggerWindowResizeForSplide();
-          });
+          if (this.templateSuffix !== 'horizontal-gallery') {
+            this.$watch('isMaxLgBreakpoint', (value) => {
+              this.splidesInFlux = true;
+
+              if (
+                (this.templateSuffix === '' && value === true) ||
+                this.templateSuffix === 'thumbnails'
+              ) {
+                setTimeout(() => {
+                  this.updateSlidesForMediaGroupWithId(this.currentMediaId);
+
+                  if (splideIsIdle(this.splide)) {
+                    // reset splide if breakpoint destroy / init failed
+                    this.splide.on('destroy.postBreakpointChange', () => {
+                      setTimeout(() => {
+                        this.initSplide();
+                        this.splidesInFlux = false;
+                      });
+
+                      this.splide.off('destroy.postBreakpointChange');
+                    });
+
+                    this.splide.destroy();
+                  } else {
+                    setTimeout(() => {
+                      this.splidesInFlux = false;
+                    });
+                  }
+                });
+              } else if (this.templateSuffix === '' && value === false) {
+                setTimeout(() => {
+                  this.resetSlides();
+
+                  setTimeout(() => {
+                    this.splidesInFlux = false;
+                  });
+                });
+              }
+            });
+          } else {
+            this.$watch('isMaxLgBreakpoint', (value) => {
+              this.triggerWindowResizeForSplide();
+            });
+          }
         }
 
         if (Shopify.designMode) {
@@ -423,6 +494,8 @@ document.addEventListener('alpine:init', () => {
           );
         }
 
+        // Set a product root for nested components
+        // to use instead of $root (which refers to their root)
         this.productRoot = this.$root;
 
         if (this.$root.querySelector('[x-data="GiftCardRecipient"]')) {
@@ -450,46 +523,103 @@ document.addEventListener('alpine:init', () => {
           if (this.firstMediaView) {
             this.firstMediaView = false;
           }
+
+          document.dispatchEvent(
+            new CustomEvent('theme:variant:change', {
+              detail: {
+                productRootEl: this.productRoot,
+                formEl: this.productRoot.querySelector(
+                  'form.shopify-product-form'
+                ),
+                variant: value,
+                previousVariant: oldValue,
+                product: this.product,
+              },
+            })
+          );
         });
 
-        this.$watch('currentMediaId', (value, oldValue) => {
+        this.productRoot.addEventListener('theme:change:variant', (event) => {
+          if (!event.detail || !event.detail.variantId) {
+            console.error('theme:change:variant requires a variant ID');
+            return;
+          }
+
+          const variant = this.getVariantById(event.detail.variantId);
+
+          if (!variant) {
+            console.error('theme:change:variant: variant not found');
+          }
+
+          this.currentVariant = variant;
+
+          this.$nextTick();
+
+          for (const position of [1, 2, 3]) {
+            this.productRoot
+              .querySelectorAll(
+                `[data-single-option-selector][data-position="${position}"]`
+              )
+              .forEach((optionEl) => {
+                optionEl.checked = optionEl.value === this[`option${position}`];
+              });
+          }
+        });
+
+        this.$watch('currentMediaId', async (value, oldValue) => {
           // There can be more than one media (e.g. for different breakpoints)
           // so we check the offsetHeight to see if the wrapper could currently
           // be visible
 
           // https://davidwalsh.name/offsetheight-visibility
 
-          this.$root
-            .querySelectorAll(
-              `[data-product-single-media-wrapper][data-media-id="${oldValue}"]`
-            )
-            .forEach((mediaWrapperEl) => {
-              if (!!mediaWrapperEl.offsetHeight) {
-                if (!this.isUsingSlideshowToDisplayMedia) {
-                  mediaWrapperEl.dispatchEvent(new CustomEvent('mediaHidden'));
-                }
-              }
-            });
+          if (
+            this.singleVariantMode &&
+            ((this.templateSuffix === '' && this.isMaxLgBreakpoint) ||
+              this.templateSuffix === 'thumbnails')
+          ) {
+            this.thumbnailActiveStatePaused = true;
 
-          this.$root
-            .querySelectorAll(
-              `[data-product-single-media-wrapper][data-media-id="${value}"]`
-            )
-            .forEach((mediaWrapperEl) => {
-              if (!!mediaWrapperEl.offsetHeight) {
-                if (this.mediaScrollTo) {
-                  if (this.isUsingSlideshowToDisplayMedia) {
-                    this.goToSlide(mediaWrapperEl);
-                  } else {
+            this.updateSlidesForMediaGroupWithId(value);
+
+            setTimeout(() => {
+              this.thumbnailActiveStatePaused = false;
+            }, 100);
+          } else {
+            this.$root
+              .querySelectorAll(
+                `[data-product-single-media-wrapper][data-media-id="${oldValue}"]`
+              )
+              .forEach((mediaWrapperEl) => {
+                if (!!mediaWrapperEl.offsetHeight) {
+                  if (!this.isUsingSlideshowToDisplayMedia) {
                     mediaWrapperEl.dispatchEvent(
-                      new CustomEvent('mediaVisible')
+                      new CustomEvent('mediaHidden')
                     );
                   }
-                } else {
-                  this.updateMedia(mediaWrapperEl.closest('li'));
                 }
-              }
-            });
+              });
+
+            this.$root
+              .querySelectorAll(
+                `[data-product-single-media-wrapper][data-media-id="${value}"]`
+              )
+              .forEach((mediaWrapperEl) => {
+                if (!!mediaWrapperEl.offsetHeight) {
+                  if (this.mediaScrollTo) {
+                    if (this.isUsingSlideshowToDisplayMedia) {
+                      this.goToSlide(mediaWrapperEl);
+                    } else {
+                      mediaWrapperEl.dispatchEvent(
+                        new CustomEvent('mediaVisible')
+                      );
+                    }
+                  } else {
+                    this.updateMedia(mediaWrapperEl.closest('li'));
+                  }
+                }
+              });
+          }
         });
 
         this.currentVariant = initialVariant;
@@ -524,7 +654,40 @@ document.addEventListener('alpine:init', () => {
           );
         }
 
+        this.allSlides = this.splideEl.querySelectorAll(
+          '.splide__slide:not(.product-thumbnail)'
+        );
+
+        if (this.thumbnailsSplideHorizontalEl) {
+          this.allHorizontalThumbnailsSlides =
+            this.thumbnailsSplideHorizontalEl.querySelectorAll(
+              '.splide__slide'
+            );
+        }
+
+        if (this.thumbnailsSplideVerticalEl) {
+          this.allVerticalThumbnailsSlides =
+            this.thumbnailsSplideVerticalEl.querySelectorAll('.splide__slide');
+        }
+
         this.__setUpSlideshow();
+
+        if (this.singleVariantMode) {
+          if (
+            (this.templateSuffix === '' && this.isMaxLgBreakpoint) ||
+            this.templateSuffix === 'thumbnails'
+          ) {
+            this.updateSlidesForMediaGroupWithId(this.currentMediaId);
+          }
+        }
+
+        this.$watch('slideCount', (value) => {
+          const dragDisableDefault = !(this.mainSplideOptions.drag === true);
+
+          this.splide.Components.Drag.disable(
+            value <= 1 ? true : dragDisableDefault
+          );
+        });
       },
       __handleOptionChange(el) {
         const position = parseInt(el.dataset.position, 10);
@@ -637,19 +800,24 @@ document.addEventListener('alpine:init', () => {
 
         document.addEventListener('dev:hotreloadmutation', async () => {
           if (!Shopify.designMode) {
-            this.splide.destroy();
-
-            await this.$nextTick();
-
-            this.initSplide();
+            if (!this.singleVariantMode) {
+              this.reinitMainSplide();
+            } else {
+              if (
+                (this.templateSuffix === '' && this.isMaxLgBreakpoint) ||
+                this.templateSuffix === 'thumbnails'
+              ) {
+                this.updateSlidesForMediaGroupWithId(this.currentMediaId);
+              } else {
+                this.reinitMainSplide();
+              }
+            }
           }
         });
       },
       initSplide() {
-        let options;
-
-        if (!this.isHorizontalGalleryTemplate) {
-          options = {
+        if (this.templateSuffix !== 'horizontal-gallery') {
+          this.mainSplideOptions = {
             arrows: Boolean(this.splideEl.querySelector('.splide__arrows')),
             pagination: Boolean(
               this.splideEl.querySelector('.splide__pagination')
@@ -662,12 +830,12 @@ document.addEventListener('alpine:init', () => {
           };
 
           if (!this.splideOnDesktop) {
-            options.breakpoints['1024'] = {
+            this.mainSplideOptions.breakpoints['1024'] = {
               destroy: true,
             };
           }
         } else {
-          options = {
+          this.mainSplideOptions = {
             type: 'slide',
             rewind: true,
             perPage: 1,
@@ -692,7 +860,7 @@ document.addEventListener('alpine:init', () => {
           };
         }
 
-        this.splide = new Splide(this.splideEl, options);
+        this.splide = new Splide(this.splideEl, this.mainSplideOptions);
 
         if (this.thumbnailsSplideHorizontalEl) {
           const mobileOnly =
@@ -732,7 +900,7 @@ document.addEventListener('alpine:init', () => {
               },
             };
 
-            this.$watch('isMaxLgBreakpoint', async (value) => {
+            this.$watch('isMaxLgBreakpoint', (value) => {
               if (value === false) {
                 this.resetSyncedSplide(this.thumbnailsSplideHorizontal);
               }
@@ -773,6 +941,11 @@ document.addEventListener('alpine:init', () => {
           this.splide.sync(this.thumbnailsSplideVertical);
         }
 
+        this.splide.on('ready', () => {
+          this.slideCount = this.splide.Components.Slides.get().length;
+          this.splideIsReady = true;
+        });
+
         this.splide.mount({ SplideProductExtension });
 
         if (this.thumbnailsSplideHorizontal) {
@@ -785,6 +958,14 @@ document.addEventListener('alpine:init', () => {
 
         this.splideEl.addEventListener('move', (e) => {
           this.splideIndex = e.detail.newIndex;
+        });
+
+        this.splide.on('refresh', () => {
+          this.slideCount = this.splide.Components.Slides.get().length;
+        });
+
+        this.splide.on('destroy', () => {
+          this.splideIsReady = false;
         });
       },
       goToSlide(el) {
@@ -892,7 +1073,7 @@ document.addEventListener('alpine:init', () => {
         });
       },
       shouldBeFullWidth() {
-        if (this.isMaxLgBreakpoint) return false;
+        if (this.isMaxLgBreakpoint || !this.$el.parentNode) return false;
 
         const mediaGroupEls = Array.from(
           this.$el.parentNode.querySelectorAll(
@@ -953,10 +1134,86 @@ document.addEventListener('alpine:init', () => {
 
         syncedSplide.destroy();
 
-        this.$nextTick(() => {
-          this.splide.sync(syncedSplide);
-          syncedSplide.mount();
-        });
+        await this.$nextTick();
+
+        this.splide.sync(syncedSplide);
+        syncedSplide.mount();
+      },
+      async reinitMainSplide() {
+        this.splide.destroy();
+
+        await this.$nextTick();
+
+        this.initSplide();
+      },
+      updateSlidesForMediaGroupWithId(id) {
+        if (this.slideCount < this.allSlides.length) {
+          this.splide.Components.Slides.remove(
+            '.splide__slide:not(.product-thumbnail)'
+          );
+
+          for (const slide of this.allSlides) {
+            this.splide.Components.Slides.add(slide);
+          }
+
+          if (this.thumbnailsSplideHorizontal) {
+            this.thumbnailsSplideHorizontal.Components.Slides.remove(
+              '.splide__slide'
+            );
+
+            for (const slide of this.allHorizontalThumbnailsSlides) {
+              this.thumbnailsSplideHorizontal.Components.Slides.add(slide);
+            }
+          }
+
+          if (this.thumbnailsSplideVertical) {
+            this.thumbnailsSplideVertical.Components.Slides.remove(
+              '.splide__slide'
+            );
+
+            for (const slide of this.allVerticalThumbnailsSlides) {
+              this.thumbnailsSplideVertical.Components.Slides.add(slide);
+            }
+
+            const lastGridlineEl =
+              this.thumbnailsSplideVerticalEl.querySelector(
+                'li[role="presentation"]'
+              );
+
+            this.thumbnailsSplideVerticalEl
+              .querySelector('.splide__list')
+              .append(lastGridlineEl);
+          }
+        }
+
+        this.splide.Components.Slides.remove(
+          `.splide__slide:not([data-media-group-id="${id}"]):not(.product-thumbnail)`
+        );
+
+        this.splide.emit('slides:updated');
+
+        if (this.thumbnailsSplideHorizontal) {
+          this.thumbnailsSplideHorizontal.Components.Slides.remove(
+            `.splide__slide:not([data-media-group-id="${id}"])`
+          );
+        }
+
+        if (this.thumbnailsSplideVertical) {
+          this.thumbnailsSplideVertical.Components.Slides.remove(
+            `.splide__slide:not([data-media-group-id="${id}"])`
+          );
+        }
+      },
+      resetSlides() {
+        if (this.slideCount < this.allSlides.length) {
+          this.splide.Components.Slides.remove(
+            '.splide__slide:not(.product-thumbnail)'
+          );
+
+          for (const slide of this.allSlides) {
+            this.splide.Components.Slides.add(slide);
+          }
+        }
       },
     })
   );

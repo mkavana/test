@@ -7,8 +7,5 @@
       "type": "cart-footer"
     }
   },
-  "order": [
-    "cart-items",
-    "cart-footer"
-  ]
+  "order": ["cart-items", "cart-footer"]
 }
