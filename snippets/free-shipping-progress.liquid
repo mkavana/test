@@ -37,7 +37,7 @@
 
 {%- if cart.item_count > 0 and threshold != 0 and threshold != blank -%}
   <div
-    class="mx-auto max-w-lg text-center pt-theme-double px-section-horizontal-spacing"
+    class="mx-auto max-w-lg px-section-horizontal-spacing pt-theme-double text-center"
   >
     <div>
       {% if subtotal < threshold %}
@@ -48,12 +48,12 @@
       {% endif %}
     </div>
 
-    <div class="mt-theme max-w-sm mx-auto">
+    <div class="mx-auto mt-theme max-w-sm">
       <div
         class="h-[max(var(--gridline-width),_0.125rem)] w-full bg-scheme-text/25"
       >
         <div
-          class="h-full transition-[width] duration-75 ease-in bg-scheme-text"
+          class="h-full bg-scheme-text transition-[width] duration-75 ease-in"
           style="width: {{ percentage }}%;"
         ></div>
       </div>

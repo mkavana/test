@@ -38,9 +38,5 @@
       "type": "related-products"
     }
   },
-  "order": [
-    "main",
-    "scrolling-text",
-    "related-products"
-  ]
+  "order": ["main", "scrolling-text", "related-products"]
 }

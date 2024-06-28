@@ -69,7 +69,7 @@
 
       <div class="{% if template == 'cart' %}no-js:lg:grid no-js:lg:grid-cols-2 no-js:lg:gap-2{% endif %} mt-4 w-full items-center justify-between">
         <button
-          class="hidden theme-button--secondary no-js:block"
+          class="theme-button--secondary hidden no-js:block"
           type="submit"
           name="update"
           form="cart"
@@ -82,7 +82,7 @@
           {%- assign checkout_button_classes = 'border-text border-button bg-button text-button hover:border-button-hover hover:bg-button-hover hover:text-button-hover' -%}
         {%- endif -%}
         <button
-          class="mt-2 w-full cursor-pointer rounded-button p-2 lg:mt-0 [text-transform:var(--button-text-transform)] after:content-[var(--button-after-content)] {{ checkout_button_classes }}"
+          class="mt-2 w-full cursor-pointer rounded-button p-2 [text-transform:var(--button-text-transform)] after:content-[var(--button-after-content)] lg:mt-0 {{ checkout_button_classes }}"
           type="submit"
           name="checkout"
           form="cart"
@@ -119,7 +119,7 @@
           x-ref="form"
           @submit.prevent="onSubmit"
         >
-          <div class="flex flex-wrap gap-2 items-end">
+          <div class="flex flex-wrap items-end gap-2">
             <div class="relative w-fit">
               <select
                 name="shipping_address[country]"
@@ -167,7 +167,7 @@
               aria-label="{{ 'cart.shipping_calculator.zip' | t }}"
             >
             <button
-              class="mt-2 lg:mt-0 w-fit shrink-0 text-sm theme-button"
+              class="theme-button mt-2 w-fit shrink-0 text-sm lg:mt-0"
               type="submit"
             >
               {{ 'cart.shipping_calculator.submit' | t }}
@@ -207,7 +207,7 @@
                   x-text="shippingRate.presentment_name"
                 ></span>
                 <span
-                  x-html="`&mdash; ${formatMoney(shippingRate.price)}`"
+                  x-html="`&mdash; ${shippingRate.currency} ${shippingRate.price}`"
                 ></span>
                 <template x-if="shippingRate.delivery_range.length">
                   <div>

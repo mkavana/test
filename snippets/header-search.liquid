@@ -68,7 +68,7 @@
     {% else %}
       @click.outside.prevent="searchOpen = false"
       @keyup.escape.prevent.stop="searchOpen = false"
-      @focusin.window="( searchOpen && ! $root.contains($event.target) ) && searchOpen = false"
+      @focusin.window="() => { if(searchOpen && ! $root.contains($event.target)) searchOpen = false }"
     {% endif %}
     x-ref="searchComponent"
     data-color-scheme="{{ section_color }}"

@@ -122,6 +122,8 @@
                   assign is_color = true
                 endif
               endif
+
+              assign presentation = filter.presentation
             -%}
             <div
               class="w-full border-b-gridline border-gridline-color py-section-vertical-spacing"
@@ -180,8 +182,70 @@
               >
                 {%- case filter.type -%}
                   {%- when 'list', 'boolean' -%}
-                    {% if is_color %}
-                      <ul class="-mx-[calc(theme(borderWidth[text])_+_1px)] mt-4 flex items-center justify-start gap-0.5">
+                    {% if presentation == 'swatch' or presentation == 'image' %}
+                      <ul class="-mx-[calc(theme(borderWidth[text])_+_1px)] mt-4 flex flex-wrap items-center justify-start gap-0.5">
+                        {%- for filter_value in filter.values -%}
+                          <li class="relative">
+                            <input
+                              type="checkbox"
+                              class="custom-input peer absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                              name="{{ filter_value.param_name }}"
+                              value="{{ filter_value.value }}"
+                              @input.debounce="filterFormSubmit"
+                              id="Filter-sidebar-{{ context }}-{{ filter.label }}-{{ forloop.index }}"
+                              {% if filter_value.active -%}
+                                checked
+                              {%- endif %}
+                              {% if filter_value.count == 0
+                                and filter_value.active == false
+                              -%}
+                                disabled
+                              {%- endif %}
+                              :disabled="loading"
+                            >
+                            <label
+                              for="Filter-sidebar-{{ context }}-{{ filter.label }}-{{ forloop.index }}"
+                              class="relative block cursor-pointer border-text border-transparent p-[2px] peer-checked:border-scheme-text {% if filter_value.count == 0 and filter_value.active == false -%}{%- else -%}[&>span:first-of-type]:hidden{%- endif %}"
+                              {% if filter_value.count == 0
+                                and filter_value.active == false
+                              -%}
+                                disabled
+                              {% endif %}
+                            >
+                              {%- capture value_style -%}
+                                {%- if presentation == 'swatch' and filter_value.swatch.color != blank or filter_value.swatch.image != blank -%}
+                                  {%- assign swatch_color = filter_value.swatch.color -%}
+                                  {%- assign swatch_image = filter_value.swatch.image -%}
+                                  background-position: {{ swatch_image.presentation.focal_point | default: 'center' }};{% if swatch_image != blank %} background-image: url({{ swatch_image | image_url: width: 120 }});{% else %}{% endif %}{% if swatch_color != blank %} background-color: rgb({{ swatch_color.rgb }});{% endif %}
+                                {%- elsif presentation == 'image' and filter_value.image != blank -%}
+                                  {%- assign filter_value_image = filter_value.image -%}
+                                  background-image: url({{ filter_value_image | image_url: width: 120 }}); background-position: {{ filter_value_image.presentation.focal_point | default: 'center' }};
+                                {%- endif -%}
+                              {%- endcapture -%}
+                              <span
+                                class="absolute inset-0 z-10 h-full w-full bg-scheme-background/25"
+                              >
+                                <span
+                                  class="absolute bottom-0 left-0 top-1/2 z-10 h-[var(--text-border-width)] w-full -translate-y-1/2 -rotate-45 transform bg-scheme-text"
+                                ></span>
+                              </span>
+                              <span
+                                class="block h-6 w-6 rounded-button bg-scheme-text/20 bg-full"
+                                {% if value_style != blank %}
+                                  style="{{ value_style }}"
+                                {% endif %}
+                              ></span>
+                              <span
+                                class="sr-only"
+                              >
+                                {{- filter_value.label -}}
+                              </span>
+                            </label>
+                          </li>
+                        {% endfor %}
+                      </ul>
+                    {% elsif is_color %}
+                      <ul class="-mx-[calc(theme(borderWidth[text])_+_1px)] mt-4 flex flex-wrap items-center justify-start gap-0.5">
                         {%- for filter_value in filter.values -%}
                           {%- liquid
                             assign color_image_url = filter_value.value | handle | append: '.' | append: 'png' | file_img_url: '110x' | prepend: 'https:'
@@ -218,7 +282,7 @@
                                 class="absolute inset-0 z-10 h-full w-full bg-scheme-background/25"
                               >
                                 <span
-                                  class="absolute bottom-0 left-0 top-1/2 z-10 h-0.5 w-full -translate-y-1/2 -rotate-45 transform bg-scheme-text"
+                                  class="absolute bottom-0 left-0 top-1/2 z-10 h-[var(--text-border-width)] w-full -translate-y-1/2 -rotate-45 transform bg-scheme-text"
                                 ></span>
                               </span>
                               <span

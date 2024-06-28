@@ -19,8 +19,11 @@ document.addEventListener('alpine:init', () => {
         Alpine.store('modals').register('promoPopup', 'promo');
 
         document.body.addEventListener('promo-is-closed', (e) => {
-          setExpiringStorageItem(this.storageKey, 'shown', daysInMs(this.frequency));
-
+          setExpiringStorageItem(
+            this.storageKey,
+            'shown',
+            daysInMs(this.frequency)
+          );
         });
 
         const popupContent =
@@ -65,24 +68,32 @@ document.addEventListener('alpine:init', () => {
             }
           }
 
-          document.addEventListener('shopify:section:select', (e) => {
-            if (!e.target.contains(this.$root)) return;
+          document.addEventListener(
+            'shopify:section:select',
+            this.onSectionSelect.bind(this)
+          );
 
-            if (!this.enabled) return;
-
-            this.open();
-          });
-
-          document.addEventListener('shopify:section:deselect', (e) => {
-            if (!e.target.contains(this.$root)) return;
-
-            this.$store.modals.close('promoPopup');
-          });
+          document.addEventListener(
+            'shopify:section:deselect',
+            this.onSectionDeselect.bind(this)
+          );
         }
       },
       open() {
         this.$store.modals.open('promoPopup');
         this.$focus.first();
+      },
+      onSectionSelect(e) {
+        if (!e.target.contains(this.$root)) return;
+
+        if (!this.enabled) return;
+
+        this.open();
+      },
+      onSectionDeselect(e) {
+        if (!e.target.contains(this.$root)) return;
+
+        this.$store.modals.close('promoPopup');
       },
       clearSuccessParams() {
         /**
@@ -92,9 +103,6 @@ document.addEventListener('alpine:init', () => {
          *
          * This will remove that search param and clear the hash.
          */
-
-        console.log(window.location);
-        console.log(window.location.search);
 
         const updatedParams = new URLSearchParams(window.location.search);
 
@@ -110,9 +118,18 @@ document.addEventListener('alpine:init', () => {
           newURL = window.location.pathname;
         }
 
-        console.log(window.location.pathname + updatedParams.toString());
-
         history.replaceState('', document.title, newURL);
+      },
+      destroy() {
+        document.removeEventListener(
+          'shopify:section:select',
+          this.onSectionSelect
+        );
+
+        document.removeEventListener(
+          'shopify:section:deselect',
+          this.onSectionDeselect
+        );
       },
     })
   );

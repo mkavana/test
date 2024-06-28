@@ -74,7 +74,7 @@
         assign separator_repeats = section.settings.separator_repeats
         assign spacing_between_repeated_separators = section.settings.spacing_between_repeated_separators
 
-        render 'scrolling-text', id: section.id, speed_setting: speed_setting, link: link, text: content, section_color: section_color, direction: direction, repeat_text: repeat_text, separator: separator, separator_repeats: separator_repeats, spacing_between_repeated_separators: spacing_between_repeated_separators
+        render 'scrolling-text', id: section.id, speed_setting: speed_setting, text: content, section_color: section_color, direction: direction, repeat_text: repeat_text, separator: separator, separator_repeats: separator_repeats, spacing_between_repeated_separators: spacing_between_repeated_separators
       -%}
     </section>
   {%- endif -%}

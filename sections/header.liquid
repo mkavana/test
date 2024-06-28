@@ -262,9 +262,9 @@
   {% endstyle %}
 {% endif %}
 
-<section
+<header-section
   x-data="Theme_Header"
-  class="{% if overlay_header %}absolute top-0 left-0 right-0 z-50{% endif %}"
+  class="block{% if overlay_header %} absolute top-0 left-0 right-0 z-50{% endif %}"
   :class="{ 'is-stuck' : isStuck }"
   {% if section.settings.sticky_header %}
     data-sticky="true"
@@ -450,7 +450,7 @@
       </div>
     </nav>
   </header>
-</section>
+</header-section>
 
 {%- liquid
   if settings.enable_breadcrumbs
@@ -499,21 +499,32 @@
   }
 {% endstyle %}
 
-<script>
-  const headerEl = document.getElementById({{ section.id | json }});
+<script
+  type="module"
+>
+  if (!customElements.get('header-section')) {
+    class HeaderSection extends HTMLElement {
+      constructor() {
+        super();
+      }
 
-  if (headerEl.getAttribute('data-sticky')) {
-    document.documentElement.style.setProperty(
-      '--sticky-header-height',
-      `${headerEl.clientHeight}px`
-    );
+      connectedCallback() {
+        if (this.getAttribute('data-sticky')) {
+          document.documentElement.style.setProperty(
+            '--sticky-header-height',
+            `${this.getBoundingClientRect().height}px`
+          );
+        } else {
+          document.documentElement.style.setProperty(
+            '--sticky-header-height',
+            '0'
+          );
+        }
+      }
+    }
+
+    customElements.define('header-section', HeaderSection);
   }
-
-  {% if overlay_header %}
-    document
-      .getElementById('shopify-section-{{ section.id }}')
-      .classList.add('has-no-height');
-  {% endif %}
 </script>
 
 {% unless request.design_mode %}

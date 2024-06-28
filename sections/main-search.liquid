@@ -40,6 +40,8 @@
     class="border-b-gridline border-gridline-color bg-scheme-background text-scheme-text"
     {% if show_filters or show_sort %}
       x-data="Filterable"
+    {% else %}
+      x-data
     {% endif %}
     data-color-scheme="scheme1"
   >
@@ -178,7 +180,15 @@
                 {% assign counter = 0 %}
                 {% for item in search.results %}
                   {% if item.object_type == 'product' %}
-                    {%- assign counter = counter | plus: 1 -%}
+                    {% liquid
+                      assign counter = counter | plus: 1
+
+                      if section.index <= 3 and forloop.index <= 1
+                        assign loading = 'eager'
+                      else
+                        assign loading = 'lazy'
+                      endif
+                    %}
                     <li class="bg-scheme-background text-scheme-text">
                       {% assign product = item %}
                       {% if section.settings.product_tile_type == 'text_overlay'
@@ -187,7 +197,8 @@
                           product: product,
                           section_color: 'scheme1',
                           products_per_row_mobile: 1,
-                          sizes: product_sizes
+                          sizes: product_sizes,
+                          loading: loading
                         -%}
                       {% else %}
                         {%- render 'product-tile-standard',
@@ -195,6 +206,7 @@
                           section_color: 'scheme1',
                           products_per_row_mobile: 1,
                           sizes: product_sizes,
+                          loading: loading,
                           enable_quick_buy: enable_quick_buy,
                           quick_buy_button_classes: quick_buy_button_classes
                         -%}
@@ -239,11 +251,11 @@
                         </a>
                         {%- if article.image != blank -%}
                           <div class="mr-4 w-16">
-                            {%
-                              render 'image-crop' with
+                            {% render 'image-crop',
                               image: article.image,
                               ratio: 1,
-                              sizes: article_sizes
+                              sizes: article_sizes,
+                              loading: 'lazy'
                             %}
                           </div>
                         {%- endif -%}

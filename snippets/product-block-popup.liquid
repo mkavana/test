@@ -1,10 +1,11 @@
-{%- if block.settings.text_color == 'text' -%}
-  {% capture color_class %}text-scheme-text group hover:text-scheme-accent{% endcapture %}
-  {% capture border_class %}border-scheme-text group-hover:border-scheme-accent {% endcapture %}
-{%- else -%}
-  {% capture color_class %}text-scheme-secondary group hover:text-scheme-accent{% endcapture %}
-  {% capture border_class %}border-scheme-secondary group-hover:border-scheme-accent{% endcapture %}
-{%- endif -%}
+{%- liquid
+  if block.settings.text_color == 'text'
+    assign color_class = 'text-scheme-text group hover:text-scheme-accent'
+  else
+    assign color_class = 'text-scheme-secondary group hover:text-scheme-accent'
+  endif
+-%}
+
 <div
   class="product-page-popup-link mt-8"
   data-color-scheme="{{ section_color }}"

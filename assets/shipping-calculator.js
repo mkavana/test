@@ -21,19 +21,21 @@ document.addEventListener('alpine:init', () => {
       return '';
     },
     get provinces() {
-      return this.selectedCountryOptionEl && this.selectedCountryOptionEl.hasAttribute('data-provinces')
+      return this.selectedCountryOptionEl &&
+        this.selectedCountryOptionEl.hasAttribute('data-provinces')
         ? JSON.parse(this.selectedCountryOptionEl.dataset.provinces)
         : [];
     },
     init() {
       if (this.$refs.countrySelect) {
-        this.selectedCountryOptionEl = this.$refs.countrySelect.selectedOptions[0];
+        this.selectedCountryOptionEl =
+          this.$refs.countrySelect.selectedOptions[0];
       }
 
       this.$watch('country', (value) => {
-        this.selectedCountryOptionEl = Array.from(this.$refs.countrySelect.options).filter(
-          (option) => option.value === value
-        )[0];
+        this.selectedCountryOptionEl = Array.from(
+          this.$refs.countrySelect.options
+        ).filter((option) => option.value === value)[0];
       });
 
       this.$watch('shippingRates', (value, oldValue) => {
@@ -98,7 +100,9 @@ document.addEventListener('alpine:init', () => {
       }
     },
     hasErrorFor(key) {
-      return Boolean(this.errorMessages && this.errorMessages.hasOwnProperty(key));
+      return Boolean(
+        this.errorMessages && this.errorMessages.hasOwnProperty(key)
+      );
     },
   }));
 });

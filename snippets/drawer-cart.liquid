@@ -9,6 +9,7 @@
         :data-modal-label="`{{ 'cart.general.title' | t }} - ${$store.cartCount.countWithText()}`"
         x-show="$store.modals.rightDrawer.contents === 'cart'"
         x-show="$store.modals.rightDrawer.contents === 'cart'"
+        data-cart-drawer
       >
         <div class="sticky top-0 z-1 flex items-center justify-between border-b-gridline border-gridline-color bg-scheme-background px-section-horizontal-spacing py-4">
           <h1 id="CartTitle" tabindex="-1">
@@ -33,7 +34,7 @@
           {% render 'cart-items' %}
         </div>
 
-        <div class="mt-auto md:sticky md:bottom-0 bg-scheme-background border-t-gridline border-gridline-color">
+        <div class="mt-auto border-t-gridline border-gridline-color bg-scheme-background md:sticky md:bottom-0">
           {% render 'cart-footer' %}
         </div>
       </div>

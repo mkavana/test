@@ -1,4 +1,8 @@
 {%- liquid
+  unless preload
+    assign preload = false
+  endunless
+
   unless loading
     assign loading = null
   endunless
@@ -41,13 +45,13 @@
 >
   {% case media.media_type %}
     {% when 'image' %}
-      {%
-        render 'image',
+      {% render 'image',
         image: media.image,
         sizes: sizes,
         image_attributes: 'data-product-featured-image',
         wrapper_attributes: 'data-product-image-wrapper',
-        loading: loading,
+        preload: preload,
+        loading: loading
       %}
       {% assign image_index = image_index | plus: 1 %}
     {% when 'external_video', 'video' %}

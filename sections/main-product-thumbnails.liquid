@@ -8,13 +8,14 @@
   assign active_thumbnail_style = section.settings.active_thumbnail_style
 
   assign thumbnails_ratio = section.settings.thumbnails_crop | plus: 0
-  assign single_variant_mode = section.settings.single_variant_mode
 
   assign always_show_product_featured_media_first = section.settings.always_show_product_featured_media_first
 
   assign models = product.media | where: 'media_type', 'model'
 
-  case section.settings.desktop_media_width
+  assign desktop_media_width = section.settings.desktop_media_width
+
+  case desktop_media_width
     when 'one-third'
       assign content_width_desktop = 'lg:col-span-8'
 
@@ -99,18 +100,16 @@
 
   if single_variant_mode
     assign variants_with_media = product.variants | where: 'featured_media'
+    assign first_variant_media = variants_with_media | map: 'featured_media' | first
+    assign variant_media_ids_array = variants_with_media | map: 'featured_media' | map: 'id' | uniq
 
-    assign variant_media_ids = ''
-
-    for variant in variants_with_media
-      assign variant_media_ids = variant_media_ids | append: variant.featured_media.id
-
-      unless forloop.last
-        assign variant_media_ids = variant_media_ids | append: ','
-      endunless
-
-      assign variant_media_ids_array = variant_media_ids | split: ','
-    endfor
+    if always_show_product_featured_media_first
+      # If there is no non-variant media, reset some assumptions
+      if first_variant_media.position == 1
+        assign always_show_product_featured_media_first = false
+        assign featured_media = current_variant.featured_media
+      endif
+    endif
   endif
 
   assign complementary_products_block = section.blocks | where: 'type', 'complementary' | first
@@ -134,8 +133,10 @@
       alwaysShowProductFeaturedMediaFirst:
         {{ always_show_product_featured_media_first }},
       shouldUpdateHistoryState: true,
+      templateSuffix: '{{ template.suffix }}',
     })
   "
+  data-product-root="{{ section.id }}"
   data-color-scheme="{{ section_color }}"
 >
   {%- liquid
@@ -156,7 +157,7 @@
   >
     {%- liquid
       if product.media.size > 1 and thumbnails_desktop == 'vertical_carousel'
-        render 'product-thumbnails-vertical-carousel', desktop_media_position: section.settings.desktop_media_position, media_ids_array: media_ids_array, thumbnails_ratio: thumbnails_ratio, active_thumbnail_style: active_thumbnail_style, sizes: vertical_thumbnails_sizes
+        render 'product-thumbnails-vertical-carousel', desktop_media_position: section.settings.desktop_media_position, media_ids_array: media_ids_array, thumbnails_ratio: thumbnails_ratio, active_thumbnail_style: active_thumbnail_style, sizes: vertical_thumbnails_sizes, single_variant_mode: single_variant_mode, variant_media_ids_array: variant_media_ids_array
       endif
     -%}
     <div
@@ -178,7 +179,12 @@
               assign media_id = media_id_string | plus: 0
               assign media = product.media | where: 'id', media_id | first
 
+              assign preload = false
               assign loading = 'lazy'
+
+              if section.index == 1 and forloop.first
+                assign preload = true
+              endif
 
               if section.index <= 3
                 if forloop.index <= 2
@@ -187,20 +193,35 @@
                   assign loading = 'eager'
                 endif
               endif
+
+              if single_variant_mode
+                if forloop.first
+                  assign media_group_id = media.id
+                endif
+
+                if variant_media_ids_array contains media.id
+                  assign media_group_id = media.id
+                endif
+              endif
             -%}
             <li
               class="splide__slide bg-scheme-background {% unless forloop.first %}[.splide:not(.is-active)_&]:hidden{% endunless %}"
               data-index="{{ forloop.index0 }}"
+              {% if single_variant_mode %}
+                {% if media_group_id %}
+                  data-media-group-id="{{ media_group_id }}"
+                {% endif %}
+              {% endif %}
             >
-              {%-
-                render 'product-media',
+              {%- render 'product-media',
                 media: media,
                 sizes: media_sizes,
                 image_index: image_index,
                 scroll_to: media_scroll_to,
                 enable_video_looping: enable_video_looping,
                 needs_desktop_padding_on_wrapper: true,
-                loading: loading,
+                preload: preload,
+                loading: loading
               -%}
             </li>
 
@@ -264,7 +285,7 @@
               assign desktop_only = true
             endif
 
-            render 'product-thumbnails-horizontal-carousel', desktop_media_position: section.settings.desktop_media_position, media_ids_array: media_ids_array, thumbnails_ratio: thumbnails_ratio, active_thumbnail_style: active_thumbnail_style, sizes: horizontal_thumbnails_sizes, mobile_only: mobile_only, desktop_only: desktop_only
+            render 'product-thumbnails-horizontal-carousel', desktop_media_position: section.settings.desktop_media_position, media_ids_array: media_ids_array, thumbnails_ratio: thumbnails_ratio, active_thumbnail_style: active_thumbnail_style, sizes: horizontal_thumbnails_sizes, mobile_only: mobile_only, desktop_only: desktop_only, single_variant_mode: single_variant_mode, variant_media_ids_array: variant_media_ids_array
           endif
         %}
       {%- endif -%}
@@ -309,6 +330,8 @@
           "
           x-init="checkIfWrapped"
           @resize.window.debounce.250="checkIfWrapped"
+          x-show="slideCount > 1"
+          :class="{ 'opacity-0' : !splideIsReady }"
         >
           <ul x-ref="pagination" class="splide__pagination"></ul>
           <div
@@ -414,8 +437,19 @@
 
 {%- liquid
   if complementary_products_block
+    case desktop_media_width
+      when 'one-third'
+        assign desktop_content_column_sizes_base = 'calc(100vw / 3)'
+      when 'one-half'
+        assign desktop_content_column_sizes_base = '50vw'
+      when 'three-fifths'
+        assign desktop_content_column_sizes_base = '40vw'
+      when 'two-thirds'
+        assign desktop_content_column_sizes_base = 'calc((100vw / 3 * 2))'
+    endcase
+
     # theme-check-disable NestedSnippet
-    render 'product-block-complementary-products-output', complementary_products_block: complementary_products_block
+    render 'product-block-complementary-products-output', complementary_products_block: complementary_products_block, desktop_sizes_base: desktop_content_column_sizes_base
     # theme-check-enable NestedSnippet
   endif
 -%}
@@ -463,18 +497,6 @@
         }
       ],
       "default": "left"
-    },
-    {
-      "type": "checkbox",
-      "id": "single_variant_mode",
-      "label": "Single variant mode",
-      "info": "Only applies when thumbnails layout is set to “Grid”. [Learn how to set up multiple variant media](https://help.switchthemes.co/baseline/guides/setup-multiple-variant-media.html)",
-      "default": false
-    },
-    {
-      "type": "checkbox",
-      "id": "always_show_product_featured_media_first",
-      "label": "Always show product featured media first"
     },
     {
       "type": "select",
@@ -551,6 +573,21 @@
         }
       ],
       "default": "indent"
+    },
+    {
+      "type": "header",
+      "content": "Product variants"
+    },
+    {
+      "type": "checkbox",
+      "id": "single_variant_mode",
+      "label": "Single variant mode",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "always_show_product_featured_media_first",
+      "label": "Always show product featured media first"
     },
     {
       "type": "header",

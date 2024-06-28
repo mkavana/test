@@ -1,4 +1,8 @@
 {%- liquid
+  unless loading
+    assign loading = 'lazy'
+  endunless
+
   assign condition = "isLgBreakpoint() && currentLink === '" | append: handle | append: "'"
 -%}
 <div
@@ -17,6 +21,7 @@
     {% render 'image',
       image: image,
       sizes: 'calc(100vw / 3)',
+      loading: loading,
       no_placeholder: true
     %}
   {% else %}

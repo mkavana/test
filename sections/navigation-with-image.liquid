@@ -41,6 +41,17 @@
 
       assign sizes = '(min-width: 1024px) calc(100vw / 3 * 2), 100vw'
   endcase
+
+  assign preload = false
+  assign loading = 'lazy'
+
+  if section.index == 1
+    assign preload = true
+  endif
+
+  if section.index <= 3
+    assign loading = 'eager'
+  endif
 -%}
 
 <section
@@ -54,13 +65,28 @@
         {%- assign image = section.settings.image -%}
         {%- if fill_image -%}
           <div class="hidden lg:block">
-            {% render 'image-fit', image: image, sizes: sizes %}
+            {% render 'image-fit',
+              image: image,
+              sizes: sizes,
+              preload: false,
+              loading: loading
+            %}
           </div>
           <div class="block lg:hidden">
-            {% render 'image', image: image, sizes: sizes %}
+            {% render 'image',
+              image: image,
+              sizes: sizes,
+              preload: preload,
+              loading: loading
+            %}
           </div>
         {%- else -%}
-          {% render 'image', image: image, sizes: sizes %}
+          {% render 'image',
+            image: image,
+            sizes: sizes,
+            preload: preload,
+            loading: loading
+          %}
         {%- endif -%}
       {%- else -%}
         {{
@@ -150,9 +176,9 @@
               <a
                 href="{{ link.url }}"
                 class="font-heading break-word hover:text-scheme-accent"
-                x-on:mouseenter="currentLink = '{% if image != blank %}{{ link.title | handleize }}{% else %}''{% endif %}'"
+                x-on:mouseenter="currentLink = '{%- if image != blank -%}{{- link.title | handleize -}}{%- endif -%}'"
                 x-on:mouseleave="setTimeout(() => { if(currentLink == '{{ link.title | handleize }}') {currentLink = ''}  }, 200)"
-                x-on:focus="currentLink = '{% if image != blank %}{{ link.title | handleize }}{% else %}''{% endif %}'"
+                x-on:focus="currentLink = '{%- if image != blank -%}{{- link.title | handleize -}}{%- endif -%}'"
                 x-on:blur="setTimeout(() => { if(currentLink == '{{ link.title | handleize }}') {currentLink = ''}  }, 200)"
               >
                 {% if superscript == 'index' -%}

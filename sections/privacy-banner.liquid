@@ -13,7 +13,7 @@
     x-transition:leave="transition duration-300 motion-reduce:duration-0 outline-0"
     x-transition:leave-start="-translate-y-[--bottom]"
     x-transition:leave-end="translate-y-full"
-    class="fixed w-full mt-auto top-auto right-0 bottom-0 left-0 overflow-y-auto pointer-events-auto px-section-horizontal-spacing py-section-vertical-spacing bg-scheme-background text-scheme-text grid gap-4 md:grid-cols-[1fr,_auto] items-center -translate-y-[--bottom]"
+    class="pointer-events-auto fixed bottom-0 left-0 right-0 top-auto z-50 mt-auto grid w-full -translate-y-[--bottom] items-center gap-4 overflow-y-auto bg-scheme-background px-section-horizontal-spacing py-section-vertical-spacing text-scheme-text md:grid-cols-[1fr,_auto]"
     id="{{ section.id }}"
     style="display: none;"
     :class="{ 'transition duration-300 motion-reduce:duration-0 delay-75' : transition }"
@@ -24,7 +24,7 @@
     </p>
     <div class="">
       <button
-        class="mr-3 theme-button"
+        class="theme-button mr-3"
         type="button"
         @click="accept"
       >

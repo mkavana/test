@@ -9,6 +9,10 @@ document.addEventListener('alpine:init', () => {
       window.addEventListener('baseline:cart:cartqtychange', (e) => {
         this._setFromFetchedSection(e.detail.response);
       });
+
+      window.addEventListener('baseline:cart:update', (e) => {
+        this._setFromFetchedSection(e.detail.response);
+      });
     },
     _setFromFetchedSection(data) {
       const countSectionHTML = data.sections['cart-item-count'];
@@ -17,6 +21,8 @@ document.addEventListener('alpine:init', () => {
         parseDOMFromString(countSectionHTML).firstElementChild.innerText.trim(),
         10
       );
+
+      window.theme.cartItemCount = this.count;
     },
     countWithText() {
       let string = theme.strings.itemCountOther;

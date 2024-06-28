@@ -19,6 +19,12 @@
   else
     assign section_color_scheme = color_scheme
   endif
+
+  if section.index == 1
+    assign preload = true
+  else
+    assign preload = false
+  endif
 -%}
 
 <section>
@@ -26,6 +32,7 @@
     height: height,
     image: image,
     image_mobile: image_mobile,
+    preload: preload,
     indent_image: indent_image,
     content_position: content_position,
     heading_size_class: heading_size_class,

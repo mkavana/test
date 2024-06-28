@@ -1,4 +1,12 @@
 {%- liquid
+  unless poster_preload
+    assign poster_preload = false
+  endunless
+
+  unless poster_loading
+    assign poster_loading = null
+  endunless
+
   assign id = section.id | append: '-' | append: video.id
   assign media_class = 'absolute inset-0 w-full h-full object-cover object-center'
   assign preview_image_media_class = media_class | append: ' transition duration-300 scale-100 group-hover:scale-105'
@@ -98,6 +106,8 @@
                   | image_url: width: 2000
                   | image_tag:
                     class: preview_image_media_class,
+                    preload: poster_preload,
+                    loading: poster_loading,
                     sizes: sizes
                 }}
               {%- else -%}

@@ -2,7 +2,7 @@
   {
     "name": "theme_info",
     "theme_name": "Baseline",
-    "theme_version": "3.0.6",
+    "theme_version": "3.2.0",
     "theme_author": "Switch Themes",
     "theme_documentation_url": "http://support.switchthemes.co",
     "theme_support_email": "support@switchthemes.co"
@@ -66,9 +66,7 @@
           }
         ],
         "role": {
-          "background": {
-            "solid": "background"
-          },
+          "background": "background",
           "text": "text",
           "primary_button": "accent",
           "on_primary_button": "accent_contrast",

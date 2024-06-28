@@ -42,7 +42,10 @@
           {%- case t -%}
             {%- when 'page' -%}
               <li class="mx-2">
-                <span class="block py-section-vertical-spacing-half" aria-hidden="true">
+                <span
+                  class="block py-section-vertical-spacing-half"
+                  aria-hidden="true"
+                >
                   {{- separator -}}
                 </span>
               </li>
@@ -58,18 +61,27 @@
             {%- when 'product' -%}
               {%- if collection.url -%}
                 <li class="mx-2">
-                  <span class="block py-section-vertical-spacing-half" aria-hidden="true">
+                  <span
+                    class="block py-section-vertical-spacing-half"
+                    aria-hidden="true"
+                  >
                     {{- separator -}}
                   </span>
                 </li>
                 <li>
-                  <a class="block py-section-vertical-spacing-half" href="{{ collection.url }}">
+                  <a
+                    class="block py-section-vertical-spacing-half"
+                    href="{{ collection.url }}"
+                  >
                     {{- collection.title -}}
                   </a>
                 </li>
               {%- endif -%}
               <li class="mx-2">
-                <span class="block py-section-vertical-spacing-half" aria-hidden="true">
+                <span
+                  class="block py-section-vertical-spacing-half"
+                  aria-hidden="true"
+                >
                   {{- separator -}}
                 </span>
               </li>
@@ -85,17 +97,26 @@
             {%- when 'collection' and collection.handle -%}
               {%- if current_tags -%}
                 <li class="mx-2">
-                  <span class="block py-section-vertical-spacing-half" aria-hidden="true">
+                  <span
+                    class="block py-section-vertical-spacing-half"
+                    aria-hidden="true"
+                  >
                     {{- separator -}}
                   </span>
                 </li>
                 <li>
-                  <a class="block py-section-vertical-spacing-half" href="{{ collection.url }}">
+                  <a
+                    class="block py-section-vertical-spacing-half"
+                    href="{{ collection.url }}"
+                  >
                     {{- collection.title -}}
                   </a>
                 </li>
                 <li class="mx-2">
-                  <span class="block py-section-vertical-spacing-half" aria-hidden="true">
+                  <span
+                    class="block py-section-vertical-spacing-half"
+                    aria-hidden="true"
+                  >
                     {{- separator -}}
                   </span>
                 </li>
@@ -111,7 +132,10 @@
                 </li>
               {%- else -%}
                 <li class="mx-2">
-                  <span class="block py-section-vertical-spacing-half" aria-hidden="true">
+                  <span
+                    class="block py-section-vertical-spacing-half"
+                    aria-hidden="true"
+                  >
                     {{- separator -}}
                   </span>
                 </li>
@@ -128,7 +152,10 @@
             {%- when 'blog' -%}
               {%- if current_tags -%}
                 <li class="mx-2">
-                  <span class="block py-section-vertical-spacing-half" aria-hidden="true">
+                  <span
+                    class="block py-section-vertical-spacing-half"
+                    aria-hidden="true"
+                  >
                     {{- separator -}}
                   </span>
                 </li>
@@ -136,7 +163,10 @@
                   {{ blog.title | link_to: blog.url }}
                 </li>
                 <li class="mx-2">
-                  <span class="block py-section-vertical-spacing-half" aria-hidden="true">
+                  <span
+                    class="block py-section-vertical-spacing-half"
+                    aria-hidden="true"
+                  >
                     {{- separator -}}
                   </span>
                 </li>
@@ -152,7 +182,10 @@
                 </li>
               {%- else -%}
                 <li class="mx-2">
-                  <span class="block py-section-vertical-spacing-half" aria-hidden="true">
+                  <span
+                    class="block py-section-vertical-spacing-half"
+                    aria-hidden="true"
+                  >
                     {{- separator -}}
                   </span>
                 </li>
@@ -168,7 +201,10 @@
               {%- endif -%}
             {%- when 'article' -%}
               <li class="mx-2">
-                <span class="block py-section-vertical-spacing-half" aria-hidden="true">
+                <span
+                  class="block py-section-vertical-spacing-half"
+                  aria-hidden="true"
+                >
                   {{- separator -}}
                 </span>
               </li>
@@ -176,7 +212,10 @@
                 {{ blog.title | link_to: blog.url }}
               </li>
               <li class="mx-2">
-                <span class="block py-section-vertical-spacing-half" aria-hidden="true">
+                <span
+                  class="block py-section-vertical-spacing-half"
+                  aria-hidden="true"
+                >
                   {{- separator -}}
                 </span>
               </li>
@@ -191,7 +230,10 @@
               </li>
             {%- else -%}
               <li class="mx-2">
-                <span class="block py-section-vertical-spacing-half" aria-hidden="true">
+                <span
+                  class="block py-section-vertical-spacing-half"
+                  aria-hidden="true"
+                >
                   {{- separator -}}
                 </span>
               </li>

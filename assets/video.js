@@ -7,7 +7,6 @@ document.addEventListener('alpine:init', () => {
     playback: 'inline',
     mode: mode,
     init() {
-      console.log('video!');
       this.id = this.$root.id;
       //this.$store.modals.modal.open = true;
       document.body.addEventListener('pauseAllMedia', (e) => {

@@ -1,4 +1,12 @@
 {%- liquid
+  unless preload
+    assign preload = false
+  endunless
+
+  unless loading
+    assign loading = null
+  endunless
+
   assign title_price_display = settings.title_price_display
 
   assign on_sale = false
@@ -28,12 +36,12 @@
 <div
   class="group relative block h-full text-center{% unless settings.title_price_display == 'on_hover' %} hover:text-scheme-accent{% endunless %}"
   {%- if settings.enable_color_swatches_on_product_tiles -%}
-    x-data="{ currentSwatchVariantId: '{{ product.selected_or_first_available_variant.id }}', productUrl: '{{ product.url | within: collection }}' }"
+    x-data="{ currentSwatchVariantId: '{{ product.selected_or_first_available_variant.id }}', productUrl: '{{ product.url }}' }"
   {%- endif -%}
   data-color-scheme="{{ section_color }}"
 >
   <a
-    href="{{ product.url | within: collection }}"
+    href="{{ product.url }}"
     {%- if settings.enable_color_swatches_on_product_tiles -%}
       :href="productUrl"
     {%- endif -%}
@@ -80,26 +88,29 @@
             style="padding-top: {{ 1 | divided_by: ratio | times: 100 }}%;"
           >
             {%- if product.featured_media != blank -%}
-              {%-
-                render 'image-fit' with
+              {%- render 'image-fit',
                 image: product.featured_media,
                 sizes: sizes,
+                preload: preload,
+                loading: loading,
                 contain: contain
               -%}
             {%- endif -%}
           </div>
         {%- elsif object_crop_grid -%}
           {%- if product.featured_media != blank -%}
-            {%-
-              render 'image-crop' with
+            {%- render 'image-crop',
               image: product.featured_media,
-              ratio: ratio,
+              sizes: sizes,
+              preload: preload,
+              loading: loading,
+              ratio: ratio
             -%}
           {%- endif -%}
         {%- else -%}
           {%- liquid
             if product.featured_media != blank
-              render 'image', image: product.featured_media, sizes: sizes
+              render 'image', image: product.featured_media, sizes: sizes, preload: preload, loading: loading
             else
               echo '<div class="relative pt-[100%]"></div>'
             endif
@@ -108,7 +119,7 @@
 
         {% liquid
           if product.media.size > 1 and settings.products_show_second_image_on_hover
-            render 'image-fit', image: product.media[1].preview_image, contain: object_contain_grid, sizes: sizes, extra_classes: 'z-10 bg-scheme-background opacity-0 transition-opacity duration-200 ease-in-out group-hover:opacity-100 group-focus-within:opacity-100'
+            render 'image-fit', image: product.media[1].preview_image, contain: contain, sizes: sizes, preload: false, loading: loading, extra_classes: 'z-10 bg-scheme-background opacity-0 transition-opacity duration-200 ease-in-out group-hover:opacity-100 group-focus-within:opacity-100'
           endif
         %}
 
@@ -153,7 +164,7 @@
                         x-show.transition.opacity.duration.200ms="currentSwatchVariantId === '{{ variant.id }}'"
                       >
                         <div class="relative h-full w-full">
-                          {% render 'image-fit', image: variant.image, contain: object_contain_grid, sizes: sizes, extra_classes = '' %}
+                          {% render 'image-fit', image: variant.image, contain: object_contain_grid, sizes: sizes, loading: 'lazy', extra_classes = '' %}
                         </div>
                       </div>
                     {%- endif -%}

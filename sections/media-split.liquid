@@ -41,16 +41,21 @@
         {% capture output %}
           {%- case block.type -%}
             {%- when 'image' -%}
+              {%- assign image = block.settings.image -%}
               <div class="relative flex min-h-full items-center justify-center {% if image == blank %} flex items-center justify-center{% endif %}">
-                {%- assign image = block.settings.image -%}
                 {% comment %}theme-check-disable LiquidTag{% endcomment %}
                 {% if image != blank %}
                   {% if forloop.index == 1 %}
-                    {% render 'image-crop',
-                      image: image,
-                      ratio: first_block_media_crop,
-                      sizes: sizes,
-                    %}
+                    {%- liquid
+                    if section.index == 1
+                      assign preload = true
+                    else
+                      assign preload = false
+                    endif
+
+                    render 'image-crop', image: image, ratio: first_block_media_crop, sizes: sizes, preload: preload
+                  -%}
+
                   {%- else -%}
                     <div class="block w-full lg:hidden">
                       {% render 'image', image: image, sizes: sizes %}

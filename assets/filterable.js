@@ -105,10 +105,12 @@ document.addEventListener('alpine:init', () => {
         )
       );
 
-      this.countHTML = querySelectorInHTMLString(
-        `[data-fragment-id="count"]`,
-        updatedHTML
-      ).innerHTML;
+      if (this.$root.querySelector(`[data-fragment-id="count"]`)) {
+        this.countHTML = querySelectorInHTMLString(
+          `[data-fragment-id="count"]`,
+          updatedHTML
+        ).innerHTML;
+      }
 
       if (this.$root.querySelector(`[data-fragment-id="drawer-toggle"]`)) {
         this.drawerToggleHTML = querySelectorInHTMLString(

@@ -52,12 +52,21 @@
   <div class="bg-scheme-background">
     <ul class="grid grid-cols-2 {{ desktop_grid_class }} gap-gutter bg-gridline-color">
       {% for product in collection.products limit: product_limit %}
-        {%- assign counter = counter | plus: 1 -%}
+        {% liquid
+          assign counter = counter | plus: 1
+
+          if section.index <= 3 and forloop.index <= products_per_row_mobile
+            assign loading = 'eager'
+          else
+            assign loading = 'lazy'
+          endif
+        %}
         <li class="{{ mobile_col_span }} {{ desktop_col_span }} bg-scheme-background text-scheme-text">
           {% if section.settings.product_tile_type == 'text_overlay' %}
             {%- render 'product-tile-text-overlay',
               product: product,
               sizes: sizes,
+              loading: loading,
               section_color: section_color,
               products_per_row_mobile: products_per_row_mobile
             -%}
@@ -65,6 +74,7 @@
             {%- render 'product-tile-standard',
               product: product,
               sizes: sizes,
+              loading: loading,
               section_color: section_color,
               products_per_row_mobile: products_per_row_mobile,
               enable_quick_buy: enable_quick_buy,
@@ -231,9 +241,7 @@
     {
       "type": "checkbox",
       "id": "show_view_all",
-      "label": {
-        "en": "Show 'View all' link"
-      },
+      "label": "Show “View all” link",
       "default": false
     },
     {

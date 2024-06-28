@@ -17,6 +17,8 @@
     assign col_span = 'lg:col-span-6'
     assign sizes = '(min-width: 1024px) calc(100vw / 12 * 6), 100vw'
   endif
+
+  assign eager_loading_limit = section.blocks.size | at_most: 4
 -%}
 
 <section class="border-b-gridline border-gridline-color bg-gridline-color">
@@ -38,16 +40,25 @@
       >
         {%- if block.settings.show_image -%}
           <div class="bg-scheme-background {% unless settings.fill_image_to_border_edge %}p-2 lg:p-4{% else %}border-b-gridline border-gridline-color{% endunless %}">
-            {%- if block.settings.image != blank -%}
-              {%
-                render 'image-crop' with
-                image: block.settings.image,
-                ratio: ratio,
-                sizes: sizes
-              %}
-            {%- else -%}
-              {% render 'image-crop-placeholder' with ratio: ratio %}
-            {%- endif -%}
+            {%- liquid
+              if block.settings.image != blank
+                assign preload = false
+                assign loading = 'lazy'
+
+                if section.index == 1 and forloop.first
+                  assign preload = true
+                endif
+
+                if section.index <= 2 and forloop.index <= eager_loading_limit
+                  assign loading = 'eager'
+                endif
+
+                render 'image-crop', image: block.settings.image, ratio: ratio, sizes: sizes, preload: preload, loading: loading
+
+              else
+                render 'image-crop-placeholder', ratio: ratio
+              endif
+            -%}
           </div>
         {%- endif -%}
 

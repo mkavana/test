@@ -2,6 +2,17 @@
 {%- liquid
   assign section_color = section.settings.color_scheme | default: 'scheme1'
   assign video = section.settings.video
+
+  assign poster_preload = false
+  assign poster_loading = 'lazy'
+
+  if section.index == 1
+    assign poster_preload = true
+  endif
+
+  if section.index <= 3
+    assign poster_loading = 'eager'
+  endif
 -%}
 
 <section
@@ -22,7 +33,9 @@
       video: video,
       mode: section.settings.mode,
       container_id: section.id,
-      ratio: section.settings.aspect_ratio
+      ratio: section.settings.aspect_ratio,
+      poster_preload: poster_preload,
+      poster_loading: poster_loading
     -%}
   </div>
 </section>

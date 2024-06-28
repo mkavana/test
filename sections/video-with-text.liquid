@@ -44,6 +44,17 @@
 
       assign sizes = '(min-width: 1024px) calc(100vw / 3 * 2), 100vw'
   endcase
+
+  assign poster_preload = false
+  assign poster_loading = 'lazy'
+
+  if section.index == 1
+    assign poster_preload = true
+  endif
+
+  if section.index <= 3
+    assign poster_loading = 'eager'
+  endif
 -%}
 
 <section class="grid grid-flow-row-dense grid-cols-1 gap-gutter overflow-hidden border-b-gridline border-gridline-color bg-gridline-color lg:grid-cols-12">
@@ -57,7 +68,9 @@
         sizes: sizes,
         mode: section.settings.mode,
         container_id: section.id,
-        ratio: section.settings.video_aspect_ratio
+        ratio: section.settings.video_aspect_ratio,
+        poster_preload: poster_preload,
+        poster_loading: poster_loading
       -%}
     </div>
   </div>

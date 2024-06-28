@@ -55,8 +55,6 @@ function loadScriptBySrc(scriptSrc) {
   scriptEl.src = scriptSrc;
   scriptEl.type = 'module';
 
-  console.log('appending', scriptEl);
-
   document.body.appendChild(scriptEl);
 
   return scriptEl;
@@ -79,11 +77,6 @@ function loadInlineScript(scriptContent) {
   console.timeEnd('inlineScriptDuplicatesCheck');
 
   if (scriptsWithSameContent.length > 0) {
-    console.log(
-      'we have a script with the same content',
-      scriptsWithSameContent
-    );
-
     return;
   } else {
     const scriptEl = document.createElement('script');
@@ -91,8 +84,6 @@ function loadInlineScript(scriptContent) {
     scriptEl.type = 'module';
 
     scriptEl.textContent = scriptContent;
-
-    console.log('appending', scriptEl);
 
     document.body.appendChild(scriptEl);
 
@@ -112,7 +103,6 @@ function loadThisScript(sourceScriptEl) {
 
       if (scriptEl) {
         scriptEl.onload = () => {
-          console.log(`loaded ${scriptEl.src}`);
           resolve();
         };
 
@@ -226,32 +216,6 @@ function previousOrLast(array, currentItem) {
   if (!currentItem) return array[array.length - 1];
 
   return array[array.indexOf(currentItem) - 1] || array[array.length - 1];
-}
-
-function getSizedImageUrl(src, size) {
-  const url = new URL(src);
-
-  url.searchParams.set('width', size);
-
-  return url;
-}
-
-function getImageSrcset(
-  src,
-  sizes = [
-    180, 360, 540, 720, 900, 1080, 1296, 1512, 1728, 1944, 2160, 2376, 2592,
-    2808, 3024,
-  ]
-) {
-  if (!src) return;
-
-  const srcset = [];
-
-  sizes.forEach((size) => {
-    srcset.push(`${getSizedImageUrl(src, size.toString())} ${size}w`);
-  });
-
-  return srcset.join(',\n');
 }
 
 function fetchConfigDefaults(acceptHeader = 'application/json') {
@@ -401,10 +365,6 @@ function isMotionSafe() {
 }
 
 function showMobileSidebarNav() {
-  console.log(
-    'showMobileSidebarNav, always show is',
-    window.alwaysShowMobileSidebarNav
-  );
   if (window.alwaysShowMobileSidebarNav === true) {
     return true;
   }

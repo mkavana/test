@@ -2,6 +2,16 @@
   unless loading
     assign loading = null
   endunless
+
+  unless preload
+    assign preload = false
+  endunless
+
+  if image_mobile != blank
+    assign desktop_preload = false
+  else
+    assign desktop_preload = preload
+  endif
 %}
 <div
   class="bg-scheme-background{% unless no_border %} border-b-gridline border-gridline-color {% endunless %}relative group overflow-hidden {% if height == 'full_screen' %}h-screen-less-gridline first-section:h-screen-less-header-group-less-gridline{% elsif height == 'full_height' %}h-full{% else %}h-auto{% endif %}"
@@ -30,9 +40,17 @@
           {% endif %}
         >
           {% if height == 'full_screen' or height == 'full_height' %}
-            {% render 'image-fit', image: image, loading: loading %}
+            {% render 'image-fit',
+              image: image,
+              loading: loading,
+              preload: desktop_preload
+            %}
           {% else %}
-            {% render 'image', image: image, loading: loading %}
+            {% render 'image',
+              image: image,
+              loading: loading,
+              preload: desktop_preload
+            %}
           {% endif %}
         </div>
 
@@ -40,9 +58,17 @@
           <div class="lg:hidden">
             {% assign image = image_mobile %}
             {% if height == 'full_screen' or height == 'full_height' %}
-              {% render 'image-fit', image: image, loading: loading %}
+              {% render 'image-fit',
+                image: image,
+                loading: loading,
+                preload: preload
+              %}
             {% else %}
-              {% render 'image', image: image, loading: loading %}
+              {% render 'image',
+                image: image,
+                loading: loading,
+                preload: preload
+              %}
             {% endif %}
           </div>
         {% endif %}

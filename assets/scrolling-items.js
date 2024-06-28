@@ -26,8 +26,6 @@ class ScrollingItemsContainer extends HTMLElement {
     this.resizeObserver.observe(this);
 
     this.addEventListener('scrolling-items:change', () => {
-      console.log('scrolling-items:change');
-
       this.scrollingItemsEl.adjustScrollingItemsSpeed();
       this.scrollingItemsEl.makeClones();
     });
@@ -76,7 +74,9 @@ class ScrollingItems extends HTMLElement {
       this.querySelector('noscript').remove();
     }
 
-    const scrollingItemsSurfaceEl = this.querySelector('scrolling-items-surface');
+    const scrollingItemsSurfaceEl = this.querySelector(
+      'scrolling-items-surface'
+    );
 
     const originalContentEl = this.querySelector('scrolling-items-content');
 
