@@ -1,0 +1,40 @@
+{
+  "type": "footer",
+  "name": "Footer group",
+  "sections": {
+    "footer": {
+      "type": "footer",
+      "blocks": {
+        "logo": {
+          "type": "logo",
+          "settings": {
+            "logo_max_width": 100
+          }
+        },
+        "text": {
+          "type": "text",
+          "settings": {
+            "heading": "",
+            "text": "<p>Use this to add additional information about your store, e.g. address / contact details.</p>"
+          }
+        },
+        "menu": {
+          "type": "menu",
+          "settings": {
+            "main_linklist": "footer",
+            "show_heading": true
+          }
+        }
+      },
+      "block_order": ["logo", "text", "menu"]
+    },
+    "hero-logo": {
+      "type": "hero-logo",
+      "disabled": true,
+      "settings": {
+        "show_bottom_border": false
+      }
+    }
+  },
+  "order": ["footer", "hero-logo"]
+}

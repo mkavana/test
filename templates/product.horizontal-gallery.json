@@ -1,0 +1,55 @@
+{
+  "name": "Product feature",
+  "sections": {
+    "main-product-horizontal-gallery": {
+      "type": "main-product-horizontal-gallery",
+      "blocks": {
+        "title": {
+          "type": "title"
+        },
+        "price": {
+          "type": "price"
+        },
+        "variant_picker": {
+          "type": "variant_picker"
+        },
+        "quantity_selector": {
+          "type": "quantity_selector"
+        },
+        "buy_buttons": {
+          "type": "buy_buttons"
+        },
+        "description": {
+          "type": "description"
+        },
+        "icon_list": {
+          "type": "icon_list"
+        },
+        "share_buttons": {
+          "type": "share_buttons"
+        }
+      },
+      "block_order": [
+        "title",
+        "price",
+        "variant_picker",
+        "quantity_selector",
+        "buy_buttons",
+        "description",
+        "icon_list",
+        "share_buttons"
+      ]
+    },
+    "scrolling-text": {
+      "type": "scrolling-text"
+    },
+    "related-products": {
+      "type": "related-products"
+    }
+  },
+  "order": [
+    "main-product-horizontal-gallery",
+    "scrolling-text",
+    "related-products"
+  ]
+}

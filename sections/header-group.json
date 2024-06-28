@@ -1,0 +1,21 @@
+{
+  "type": "header",
+  "name": "Header",
+  "sections": {
+    "announcement-bar": {
+      "type": "announcement-bar",
+      "settings": {}
+    },
+    "header": {
+      "type": "header",
+      "settings": {
+        "logo": "{{ shop.brand.logo }}"
+      }
+    },
+    "hero-logo": {
+      "type": "hero-logo",
+      "disabled": true
+    }
+  },
+  "order": ["announcement-bar", "header", "hero-logo"]
+}

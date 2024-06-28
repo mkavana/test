@@ -1,0 +1,313 @@
+{
+  "sections": {
+    "featured-navigation": {
+      "type": "featured-navigation",
+      "settings": {
+        "menu": "",
+        "mobile_text_scale": 3,
+        "desktop_text_scale": 9,
+        "display": "paragraph",
+        "paragraph_separator": "emdash",
+        "superscript": "product_count",
+        "text_alignment": "text-left",
+        "show_image_on_hover": true,
+        "color_scheme": ""
+      }
+    },
+    "scrolling-text": {
+      "type": "scrolling-text",
+      "settings": {
+        "text": "Use this text to share information about your brand with your customers. Describe a product, share announcements, or welcome customers to your store.",
+        "link": "",
+        "mobile_text_scale": 0,
+        "desktop_text_scale": 4,
+        "font": "font-heading",
+        "speed": 180,
+        "direction": "normal",
+        "repeat_text": true,
+        "separator": "&bullet;",
+        "separator_repeats": 1,
+        "spacing_between_repeated_separators": "",
+        "color_scheme": "scheme2"
+      }
+    },
+    "featured-collection-carousel-1": {
+      "type": "featured-collection-carousel",
+      "settings": {
+        "title": "Featured collection",
+        "collection": "",
+        "product_tile_type": "standard",
+        "product_limit": 8,
+        "show_view_all": false,
+        "image_crop": "none",
+        "mobile_product_tile_width": "80",
+        "desktop_product_tile_width": 22,
+        "enable_quick_buy": false,
+        "quick_buy_button_style": "theme-button",
+        "color_scheme": ""
+      }
+    },
+    "feature-text": {
+      "type": "feature-text",
+      "settings": {
+        "text": "<p>Use this text to share information about your brand with your customers. Describe a product, share announcements, or welcome customers to your store.</p>",
+        "mobile_text_scale": 2,
+        "desktop_text_scale": 6,
+        "font": "font-heading",
+        "text_alignment": "text-left",
+        "cta_link": "",
+        "cta_text": "",
+        "cta_style": "button",
+        "desktop_width": "full",
+        "desktop_alignment": "left",
+        "color_scheme": "scheme1"
+      }
+    },
+    "featured-collection-table": {
+      "type": "featured-collection-table",
+      "blocks": {
+        "featured-collection-table-title-1": {
+          "type": "title",
+          "settings": {}
+        },
+        "featured-collection-table-price-1": {
+          "type": "price",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "featured-collection-table-title-1",
+        "featured-collection-table-price-1"
+      ],
+      "settings": {
+        "title": "Featured collection table",
+        "collection": "",
+        "product_limit": 18,
+        "show_column_labels_on_mobile": false,
+        "show_view_all": false,
+        "show_media_on_mobile": false,
+        "desktop_media_display": "hover",
+        "enable_quick_buy": false,
+        "quick_buy_button_style": "text",
+        "color_scheme": ""
+      }
+    },
+    "image-with-text-overlay": {
+      "type": "image-with-text-overlay",
+      "settings": {
+        "indent_image": false,
+        "height": "natural",
+        "title": "Image with text overlay",
+        "heading_size": "text-heading-feature",
+        "text": "",
+        "content_position": "justify-center items-center text-center",
+        "content_width_desktop": "lg:w-2/3",
+        "color_scheme": "",
+        "cta_link": "",
+        "cta_text": "",
+        "cta_style": "link"
+      }
+    },
+    "scrolling-product-links-1": {
+      "type": "scrolling-product-links",
+      "settings": {
+        "collection": "",
+        "product_limit": 5,
+        "mobile_text_scale": 1,
+        "desktop_text_scale": 4,
+        "font": "font-heading",
+        "media_display": "inline",
+        "speed": 180,
+        "direction": "normal",
+        "separator": "&middot;",
+        "separator_repeats": 1,
+        "spacing_between_repeated_separators": "",
+        "color_scheme": ""
+      }
+    },
+    "scrolling-product-links-2": {
+      "type": "scrolling-product-links",
+      "settings": {
+        "collection": "",
+        "product_limit": 5,
+        "mobile_text_scale": 2,
+        "desktop_text_scale": 4,
+        "font": "font-heading",
+        "media_display": "inline",
+        "speed": 180,
+        "direction": "reverse",
+        "separator": "&middot;",
+        "separator_repeats": 1,
+        "spacing_between_repeated_separators": "",
+        "color_scheme": ""
+      }
+    },
+    "collection-list": {
+      "type": "collection-list",
+      "blocks": {
+        "collection-list-collection-1": {
+          "type": "collection",
+          "settings": {
+            "collection": "",
+            "indent_image": false,
+            "content_position": "justify-start items-start text-left",
+            "color_scheme": "",
+            "scheme_text_color_only": false
+          }
+        },
+        "collection-list-collection-2": {
+          "type": "collection",
+          "settings": {
+            "collection": "",
+            "indent_image": false,
+            "content_position": "justify-start items-start text-left",
+            "color_scheme": "",
+            "scheme_text_color_only": false
+          }
+        }
+      },
+      "block_order": [
+        "collection-list-collection-1",
+        "collection-list-collection-2"
+      ],
+      "settings": {
+        "title": "",
+        "font": "font-body",
+        "text_size": "text-base",
+        "crop": "1",
+        "color_scheme": ""
+      }
+    },
+    "featured-collection-carousel-2": {
+      "type": "featured-collection-carousel",
+      "settings": {
+        "title": "Featured collection",
+        "collection": "",
+        "product_tile_type": "standard",
+        "product_limit": 8,
+        "show_view_all": false,
+        "image_crop": "none",
+        "mobile_product_tile_width": "80",
+        "desktop_product_tile_width": 22,
+        "enable_quick_buy": false,
+        "quick_buy_button_style": "theme-button",
+        "color_scheme": ""
+      }
+    },
+    "logo-list": {
+      "type": "logo-list",
+      "blocks": {
+        "logo-list-image-1": {
+          "type": "image",
+          "settings": {
+            "link": ""
+          }
+        },
+        "logo-list-image-2": {
+          "type": "image",
+          "settings": {
+            "link": ""
+          }
+        },
+        "logo-list-image-3": {
+          "type": "image",
+          "settings": {
+            "link": ""
+          }
+        },
+        "logo-list-image-4": {
+          "type": "image",
+          "settings": {
+            "link": ""
+          }
+        },
+        "logo-list-image-5": {
+          "type": "image",
+          "settings": {
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "logo-list-image-1",
+        "logo-list-image-2",
+        "logo-list-image-3",
+        "logo-list-image-4",
+        "logo-list-image-5"
+      ],
+      "settings": {
+        "heading": "",
+        "max_width": 150,
+        "logo_alignment": "center",
+        "color_scheme": ""
+      }
+    },
+    "testimonials": {
+      "type": "testimonials",
+      "blocks": {
+        "testimonials-testimonial-1": {
+          "type": "testimonial",
+          "settings": {
+            "quote": "<p>A quote from a customer or staff member can help show of your products' unique selling points.</p>",
+            "source": "Source"
+          }
+        },
+        "testimonials-testimonial-2": {
+          "type": "testimonial",
+          "settings": {
+            "quote": "<p>A quote from a customer or staff member can help show of your products' unique selling points.</p>",
+            "source": "Source"
+          }
+        },
+        "testimonials-testimonial-3": {
+          "type": "testimonial",
+          "settings": {
+            "quote": "<p>A quote from a customer or staff member can help show of your products' unique selling points.</p>",
+            "source": "Source"
+          }
+        }
+      },
+      "block_order": [
+        "testimonials-testimonial-1",
+        "testimonials-testimonial-2",
+        "testimonials-testimonial-3"
+      ],
+      "settings": {
+        "heading": "",
+        "font": "font-heading",
+        "text_size": "text-heading-secondary",
+        "text_align": "text-left",
+        "color_scheme": ""
+      }
+    },
+    "blog-posts": {
+      "type": "blog-posts",
+      "settings": {
+        "title": "Blog posts",
+        "blog": "news",
+        "post_limit": 3,
+        "blog_show_images": true,
+        "blog_show_author": false,
+        "blog_show_date": true,
+        "show_view_all": false,
+        "crop": "1",
+        "color_scheme": ""
+      }
+    }
+  },
+  "order": [
+    "featured-navigation",
+    "scrolling-text",
+    "featured-collection-carousel-1",
+    "feature-text",
+    "featured-collection-table",
+    "image-with-text-overlay",
+    "scrolling-product-links-1",
+    "scrolling-product-links-2",
+    "collection-list",
+    "featured-collection-carousel-2",
+    "logo-list",
+    "testimonials",
+    "blog-posts"
+  ]
+}

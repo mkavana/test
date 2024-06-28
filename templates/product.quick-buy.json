@@ -1,0 +1,9 @@
+{
+  "layout": false,
+  "sections": {
+    "main": {
+      "type": "main-product-quick-buy"
+    }
+  },
+  "order": ["main"]
+}
